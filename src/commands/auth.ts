@@ -1,0 +1,734 @@
+import { readFileSync, writeFileSync, mkdirSync, existsSync, unlinkSync, chmodSync } from 'fs';
+import { join } from 'path';
+import { homedir } from 'os';
+import { createInterface } from 'readline';
+import { getSetting, saveSetting } from '../settings';
+import { result, status } from '../output';
+import { assertIanaTimezone } from '../dates';
+import { ApiError, PostemiAPI, serverSentence, SubscriptionState, Workspace } from '../api';
+import { getWorkspaceId } from '../config';
+import { BRAND, envName, networkError, readEnv } from '../brand';
+
+const CREDENTIALS_DIR = join(homedir(), BRAND.configDirName);
+const CREDENTIALS_FILE = join(CREDENTIALS_DIR, 'credentials.json');
+
+/**
+ * Where the device flow lives: `POST /device/code`, `POST /device/token`, and
+ * an approval page on the web app where the person picks which workspace and
+ * channels the key may reach. Override with `POSTEMI_AUTH_SERVER`.
+ */
+const DEFAULT_AUTH_SERVER = BRAND.defaultAuthServer;
+
+/** Used when neither the credentials file nor POSTEMI_API_URL names one. */
+const DEFAULT_API_URL = BRAND.defaultApiUrl;
+
+interface StoredCredentials {
+  accessToken: string;
+  apiUrl: string;
+  organizationId?: string;
+}
+
+export function loadCredentials(): StoredCredentials | null {
+  try {
+    if (!existsSync(CREDENTIALS_FILE)) return null;
+    const data = JSON.parse(readFileSync(CREDENTIALS_FILE, 'utf-8'));
+    if (!data.accessToken) return null;
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+export function saveCredentials(credentials: StoredCredentials): void {
+  if (!existsSync(CREDENTIALS_DIR)) {
+    mkdirSync(CREDENTIALS_DIR, { recursive: true, mode: 0o700 });
+  }
+  writeFileSync(CREDENTIALS_FILE, JSON.stringify(credentials, null, 2), { encoding: 'utf-8', mode: 0o600 });
+  // Ensure permissions even if file already existed
+  chmodSync(CREDENTIALS_FILE, 0o600);
+}
+
+function deleteCredentials(): void {
+  if (existsSync(CREDENTIALS_FILE)) {
+    unlinkSync(CREDENTIALS_FILE);
+  }
+}
+
+/*
+  SPAWNED WITH THE URL AS AN ARGUMENT, NEVER INTERPOLATED INTO A SHELL STRING.
+
+  Never build `open "${url}"` for exec(), which runs it through a shell. The
+  url is not ours -- it comes from whatever
+  POSTEMI_AUTH_SERVER points at -- so a hostile or intercepted auth server could
+  close the quote and append a command that runs on the machine of whoever
+  typed `postemi auth:login`. Better quoting is not the fix; the shell is.
+
+  spawn() with an argv array involves no shell, so the url stays one argument
+  whatever it contains. Windows is the exception: `start` is a cmd builtin
+  rather than a program, so it needs cmd -- and there the url is passed AS AN
+  ARGUMENT to cmd rather than pasted into the command string.
+*/
+export function openBrowser(url: string): void {
+  const { spawn } = require('child_process');
+  const opts = { stdio: 'ignore' as const, detached: true };
+
+  const child =
+    process.platform === 'darwin'
+      ? spawn('open', [url], opts)
+      : process.platform === 'win32'
+      ? spawn('cmd', ['/c', 'start', '', url], opts)
+      : spawn('xdg-open', [url], opts);
+
+  // A machine with no browser (a server, a container) must not take the login
+  // down with it. The url is printed for the user either way.
+  child.on('error', () => {});
+  child.unref();
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function ask(question: string): Promise<string> {
+  const rl = createInterface({ input: process.stdin, output: process.stderr });
+  return new Promise((resolve) =>
+    rl.question(question, (answer) => {
+      rl.close();
+      resolve(answer);
+    })
+  );
+}
+
+/**
+ * One-time scheduling-timezone setup, run after a successful login.
+ *
+ * Dates written without an explicit offset are refused unless a timezone is
+ * configured (see dates.ts), so a fresh login on a TTY is the moment to set
+ * one: detect the machine's zone, ask the human to confirm it, save it to
+ * `~/.postemi/config.json`. Skipped when a timezone is already saved, and
+ * skipped entirely off-TTY — scripts and agents must use `--timezone`,
+ * `POSTEMI_TIMEZONE` or `postemi config:set timezone`.
+ */
+async function maybeConfigureTimezone(): Promise<void> {
+  if (getSetting('timezone')) return;
+  if (!process.stdin.isTTY || !process.stderr.isTTY) return;
+
+  const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  const answer = (await ask(`\nScheduling timezone: ${detected} — OK? [Y/n] `))
+    .trim()
+    .toLowerCase();
+
+  let timezone = detected;
+  if (answer === 'n' || answer === 'no') {
+    const typed = (
+      await ask(`Enter an IANA timezone name (e.g. ${BRAND.exampleTimezone}), or leave empty to skip: `)
+    ).trim();
+    if (!typed) {
+      console.error(
+        `Skipped. Dates without an explicit offset will be refused until you run: ${BRAND.cli} config:set timezone <IANA name>`
+      );
+      return;
+    }
+    try {
+      timezone = assertIanaTimezone(typed, 'auth:login');
+    } catch (error: any) {
+      console.error(error.message);
+      console.error(
+        `Skipped. Set it later with: ${BRAND.cli} config:set timezone <IANA name>`
+      );
+      return;
+    }
+  } else if (answer && answer !== 'y' && answer !== 'yes') {
+    console.error(
+      `Skipped. Set it later with: ${BRAND.cli} config:set timezone <IANA name>`
+    );
+    return;
+  }
+
+  saveSetting('timezone', timezone);
+  console.error(
+    `✅ Scheduling timezone saved: ${timezone} (change it with "${BRAND.cli} config:set timezone <IANA name>")`
+  );
+}
+
+/**
+ * Which workspace the new key acts on, decided right after login.
+ *
+ * The approval page can grant one workspace or all of them. With one there
+ * is nothing to ask and the id is stored so `auth:status` can name it. With
+ * several the API refuses every request that does not name one, so the
+ * choice is made here, on a TTY, and stored; off-TTY the hint says how.
+ * Never fatal: a login that worked stays worked.
+ */
+async function chooseWorkspace(creds: StoredCredentials): Promise<void> {
+  let workspaces: Workspace[];
+  try {
+    workspaces = await new PostemiAPI({
+      apiKey: creds.accessToken,
+      apiUrl: creds.apiUrl,
+    }).listWorkspaces();
+  } catch {
+    return;
+  }
+
+  if (workspaces.length === 1) {
+    saveCredentials({ ...creds, organizationId: workspaces[0].id });
+    console.error(`🏢 Workspace: ${workspaces[0].name}`);
+    return;
+  }
+  if (workspaces.length < 2) return;
+
+  console.error('\nThis key reaches several workspaces:');
+  workspaces.forEach((w, i) => console.error(`  ${i + 1}. ${w.name}  (${w.id})`));
+
+  if (!process.stdin.isTTY || !process.stderr.isTTY) {
+    console.error(
+      `Pick one with: ${BRAND.cli} workspaces:use <id>   (or pass --workspace <id> on each command)`
+    );
+    return;
+  }
+
+  const answer = (await ask(`Work in which one? [1-${workspaces.length}] `)).trim();
+  const index = Number(answer) - 1;
+  const chosen = workspaces[index];
+  if (!chosen) {
+    console.error(`Skipped. Pick one later with: ${BRAND.cli} workspaces:use <id>`);
+    return;
+  }
+  saveCredentials({ ...creds, organizationId: chosen.id });
+  console.error(`✅ Workspace: ${chosen.name} (change it with "${BRAND.cli} workspaces:use <id>")`);
+}
+
+export async function authLogin(argv: any) {
+  const authServer = argv.authServer || readEnv('AUTH_SERVER') || DEFAULT_AUTH_SERVER;
+
+  console.log('🔐 Starting device authorization flow...\n');
+
+  // Step 1: Request a device code from the auth server
+  let deviceCode: string;
+  let userCode: string;
+  let verificationUri: string;
+  let expiresIn: number;
+  let interval: number;
+
+  try {
+    const response = await fetch(`${authServer}/device/code`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      // Shown on the approval page, so somebody can tell the login they just
+      // started from one they did not.
+      body: JSON.stringify({
+        client_name: readEnv('CLIENT_NAME') || BRAND.clientName,
+        // Asks for Postemi's approval page (postemi.com/app/device).
+        brand: 'postemi',
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      console.error(`❌ Failed to start authorization (${response.status}): ${error}`);
+      process.exit(1);
+    }
+
+    const data = (await response.json()) as any;
+    deviceCode = data.device_code;
+    userCode = data.user_code;
+    verificationUri = data.verification_uri;
+    expiresIn = data.expires_in;
+    interval = data.interval || 5;
+  } catch (error: any) {
+    console.error(`❌ ${networkError(`Could not reach auth server at ${authServer}`, error, 'AUTH_SERVER')}`);
+    process.exit(1);
+  }
+
+  // Step 2: Show the user code and open browser
+  console.log('  Your authorization code:\n');
+  console.log(`    ┌─────────────────┐`);
+  console.log(`    │    ${userCode}    │`);
+  console.log(`    └─────────────────┘\n`);
+  console.log(`  Open this URL and enter the code above:`);
+  console.log(`  ${verificationUri}\n`);
+
+  openBrowser(`${verificationUri}?code=${encodeURIComponent(userCode)}`);
+
+  console.log('  Waiting for authorization...\n');
+
+  // Step 3: Poll for the token
+  const deadline = Date.now() + expiresIn * 1000;
+
+  while (Date.now() < deadline) {
+    await sleep(interval * 1000);
+
+    try {
+      const response = await fetch(`${authServer}/device/token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ device_code: deviceCode }),
+      });
+
+      const data = (await response.json()) as any;
+
+      if (response.ok && data.access_token) {
+        const creds: StoredCredentials = {
+          accessToken: data.access_token,
+          /*
+            The host the login ran on (api.postemi.com), not the `api_url` in
+            the token response: the Postemi host is what makes the API answer
+            as Postemi.
+          */
+          apiUrl: String(authServer).replace(/\/+$/, ''),
+          organizationId: data.organization_id,
+        };
+        saveCredentials(creds);
+
+        console.log('✅ Successfully authenticated!');
+        console.log(`📁 Credentials saved to ${CREDENTIALS_FILE}`);
+        await chooseWorkspace(creds);
+        await maybeConfigureTimezone();
+        return;
+      }
+
+      if (data.error === 'authorization_pending') {
+        continue;
+      }
+
+      if (data.error === 'expired_token') {
+        console.error('❌ Authorization expired. Please try again.');
+        process.exit(1);
+      }
+
+      // Unknown error
+      console.error(`❌ Authorization failed: ${data.error}`);
+      process.exit(1);
+    } catch {
+      // Network error during poll — keep trying
+      continue;
+    }
+  }
+
+  console.error('❌ Authorization timed out. Please try again.');
+  process.exit(1);
+}
+
+const TERMS_URL = BRAND.termsUrl;
+const PRIVACY_URL = BRAND.privacyUrl;
+
+/** POST a JSON body to the unauthenticated sign-up routes. */
+async function signupRequest(
+  apiUrl: string,
+  path: string,
+  body: Record<string, unknown>
+): Promise<{ status: number; data: any }> {
+  const response = await fetch(`${apiUrl}/public/v1${path}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const text = await response.text();
+  let data: any = text;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    // not JSON; keep the text for the error message
+  }
+  return { status: response.status, data };
+}
+
+/** One shell word: quoted only when it has to be, so the command stays readable. */
+function shellWord(value: string): string {
+  return /^[A-Za-z0-9_@%+=:,./-]+$/.test(value)
+    ? value
+    : `'${value.replace(/'/g, `'\\''`)}'`;
+}
+
+/**
+ * The person's timezone for the new account: `--timezone`, then the one
+ * saved by `config:set`, then this machine's own zone. An agent usually runs
+ * on the person's machine, and a workspace without a zone schedules in UTC.
+ */
+function signupTimezone(argv: any): string | undefined {
+  const chosen = argv.timezone || getSetting('timezone');
+  if (chosen) return String(chosen);
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/** The server's refusal as one sentence, whatever shape it came in. */
+function refusal(data: any): string {
+  if (typeof data === 'string') return data;
+  const message = data?.msg ?? data?.message;
+  return Array.isArray(message) ? message.join('; ') : String(message ?? JSON.stringify(data));
+}
+
+/**
+ * `postemi auth:signup --email <address> [--workspace-name <name>] [--code <code>] [--accept-terms]`
+ *
+ * CREATES A NEW POSTEMI ACCOUNT for the person at that address, with a code
+ * from their mailbox, and stores its key exactly like `auth:login` does
+ * (~/.postemi/credentials.json, 0600). The key is never printed.
+ *
+ * NO FREE TRIAL. An account made this way has no trial and no plan: the key
+ * opens only the billing commands until the person pays, so the next step is
+ * `postemi billing:plans` and `postemi billing:subscribe`.
+ *
+ * Two shapes, so both a person at a terminal and an agent without one can
+ * drive it:
+ *   - interactive: one run sends the code, asks for it, asks whether the
+ *     person agrees to the terms, and finishes;
+ *   - an agent: the first run (no --code, no TTY) sends the code and prints
+ *     what to run next; the second run passes --code and --accept-terms,
+ *     which the agent sends only after the person has read the terms and the
+ *     privacy notice and agreed.
+ */
+export async function authSignup(argv: any) {
+  const email = String(argv.email || '').trim();
+  const apiUrl = String(
+    argv.apiUrl || readEnv('API_URL') || DEFAULT_API_URL
+  ).replace(/\/+$/, '');
+  const language = argv.language ? String(argv.language) : undefined;
+  const timezone = signupTimezone(argv);
+  const interactive = !!process.stdin.isTTY && !!process.stderr.isTTY;
+
+  if (!email.includes('@')) {
+    console.error('❌ Give the e-mail address of the new account with --email.');
+    process.exit(1);
+  }
+
+  let code = argv.code ? String(argv.code).trim() : '';
+
+  try {
+    if (!code) {
+      const started = await signupRequest(apiUrl, '/signup/start', {
+        email,
+        ...(language ? { language } : {}),
+      });
+      if (started.status !== 202 && started.status !== 200) {
+        console.error(
+          `❌ Could not send the code (HTTP ${started.status}): ${refusal(started.data)}`
+        );
+        process.exit(1);
+      }
+
+      status(`📧 A six-digit code was sent to ${email}. It is valid for 10 minutes.`);
+      status('   Accounts created this way have no free trial; a plan is chosen and paid for next.');
+
+      if (!interactive) {
+        /*
+          An agent: the person reads the code back, then the second run.
+          EVERY option of this run rides along in the printed command. The
+          first version printed only --email, so the second run lost the
+          API URL (and hit the wrong server), the language, the workspace
+          name and the timezone.
+        */
+        const nextCommand = [
+          `${BRAND.cli} auth:signup`,
+          `--email ${shellWord(email)}`,
+          '--code <code>',
+          '--accept-terms',
+          ...(argv.apiUrl ? [`--api-url ${shellWord(apiUrl)}`] : []),
+          ...(language ? [`--language ${language}`] : []),
+          ...(argv.workspaceName
+            ? [`--workspace-name ${shellWord(String(argv.workspaceName))}`]
+            : []),
+          ...(timezone ? [`--timezone ${shellWord(timezone)}`] : []),
+        ].join(' ');
+        result({
+          codeSent: true,
+          email,
+          trial: false,
+          terms: TERMS_URL,
+          privacy: PRIVACY_URL,
+          timezone: timezone ?? null,
+          language: language ?? null,
+          next: `Ask the person for the code, show them ${TERMS_URL} and ${PRIVACY_URL}, and when they agree run: ${nextCommand}`,
+        });
+        return;
+      }
+
+      code = (await ask('Code from the e-mail: ')).trim();
+      if (!code) {
+        console.error('❌ No code given. Run the command again with --code <code>.');
+        process.exit(1);
+      }
+    }
+
+    if (!/^[0-9]{6}$/.test(code)) {
+      console.error('❌ The code is the six digits from the e-mail.');
+      process.exit(1);
+    }
+
+    status('');
+    status('To create the account the person must agree to:');
+    status(`  Terms of service:  ${TERMS_URL}`);
+    status(`  Privacy notice:    ${PRIVACY_URL}`);
+
+    let accepted = !!argv.acceptTerms;
+    if (!accepted && interactive) {
+      const answer = (await ask('Do you agree to both? [y/N] ')).trim().toLowerCase();
+      accepted = answer === 'y' || answer === 'yes' || answer === 'i' || answer === 'igen';
+    }
+    if (!accepted) {
+      console.error(
+        '❌ No account was created: the terms were not accepted. Show the person the two links above; if they agree, run the command again with --accept-terms.'
+      );
+      process.exit(1);
+    }
+
+    const completed = await signupRequest(apiUrl, '/signup/complete', {
+      email,
+      code,
+      acceptTerms: true,
+      ...(argv.workspaceName ? { workspaceName: String(argv.workspaceName) } : {}),
+      ...(timezone ? { timezone: String(timezone) } : {}),
+      ...(language ? { language } : {}),
+    });
+
+    if (completed.status === 409) {
+      console.error(`❌ ${refusal(completed.data)}`);
+      console.error(`   Sign in instead: ${BRAND.cli} auth:login`);
+      process.exit(1);
+    }
+    if (completed.status !== 201 && completed.status !== 200) {
+      console.error(
+        `❌ The account was not created (HTTP ${completed.status}): ${refusal(completed.data)}`
+      );
+      process.exit(1);
+    }
+
+    const data = completed.data || {};
+    if (!data.apiKey) {
+      console.error(`❌ The server answered without a key. Sign in with: ${BRAND.cli} auth:login`);
+      process.exit(1);
+    }
+
+    if (loadCredentials()) {
+      status('ℹ️  The credentials stored before are replaced by the new account\'s key.');
+    }
+    saveCredentials({
+      accessToken: data.apiKey,
+      apiUrl,
+      organizationId: data.workspaceId,
+    });
+
+    status(`✅ Account created. Workspace: ${data.workspaceName}`);
+    status(`📁 Key saved to ${CREDENTIALS_FILE}`);
+    status('');
+    status('No free trial on this account. Next:');
+    status(`  ${BRAND.cli} billing:plans`);
+    status(`  ${BRAND.cli} billing:subscribe --tier <slug> --period <monthly|yearly>`);
+    status(`The person opens the checkout link and pays. This key then works for every command only on a plan with API access (apiAndMcpAccess: true in billing:plans); ${BRAND.basicPlanName} has none, so say so before the person picks it.`);
+
+    result({
+      created: true,
+      workspaceId: data.workspaceId,
+      workspaceName: data.workspaceName,
+      trial: false,
+      credentials: CREDENTIALS_FILE,
+      next: [
+        `${BRAND.cli} billing:plans`,
+        `${BRAND.cli} billing:subscribe --tier <slug> --period <monthly|yearly>`,
+        `${BRAND.cli} billing:status`,
+      ],
+      note: `This key keeps working after the payment only on a plan with apiAndMcpAccess: true in billing:plans. ${BRAND.basicPlanName} has no API access: tell the person before they pay for it.`,
+    });
+  } catch (error: any) {
+    console.error(`❌ ${networkError(`Could not reach the ${BRAND.name} API at ${apiUrl}`, error)}`);
+    process.exit(1);
+  }
+}
+
+export async function authLogout() {
+  const creds = loadCredentials();
+  if (!creds) {
+    console.log('ℹ️  No stored credentials found.');
+    return;
+  }
+
+  deleteCredentials();
+  console.log('✅ Credentials removed.');
+}
+
+/**
+ * Report who we are authenticated as, and whether those credentials still work.
+ *
+ * OBEYS THE OUTPUT CONTRACT, which it used to break in both directions: it
+ * printed its human report to STDOUT and returned 0 even when the credentials
+ * were invalid. SKILL.md tells an agent to run this first and pipe it to `jq`,
+ * so the emoji went straight into the parser, and a caller that checked the
+ * exit code was told "fine" about an expired token.
+ *
+ * Now the prose goes to stderr, a machine-readable verdict goes to stdout, and
+ * anything short of working credentials exits 1.
+ *
+ * ONLY THE KEY PREFIX IS EVER SHOWN. `psty_mcp_` keys are eight characters of
+ * literal prefix, so the old `substring(0, 8)` revealed nothing — but for a
+ * `pos_` OAuth token those same eight characters were four real secret ones.
+ * The prefix is enough to tell two keys apart, which is all this is for.
+ */
+export async function authStatus() {
+  const envKey = readEnv('API_KEY');
+  const creds = loadCredentials();
+
+  /** Enough to identify a key, never enough to use one. */
+  const hint = (token: string) => `${token.split('_')[0]}_…`;
+
+  /*
+    THE METHOD IS THE CREDENTIAL, NOT THE FILE IT CAME FROM. Both
+    `auth:login` and `auth:signup` store an API key (`psty_…`) in
+    credentials.json; only a `pos_` token is OAuth. This used to say
+    "OAuth2" for anything in the file.
+  */
+  const methodOf = (token: string): 'oauth2' | 'api-key' =>
+    token.startsWith('pos_') ? 'oauth2' : 'api-key';
+  const label = (m: 'oauth2' | 'api-key') =>
+    m === 'oauth2' ? 'OAuth token' : 'API key';
+
+  let apiKey: string | undefined;
+  let apiUrl: string;
+  let method: 'oauth2' | 'api-key';
+  let source: 'credentials-file' | 'environment';
+
+  if (creds) {
+    method = methodOf(creds.accessToken);
+    source = 'credentials-file';
+    apiKey = creds.accessToken;
+    apiUrl = creds.apiUrl;
+    status(`🔐 Authentication method: ${label(method)} (stored by auth:login or auth:signup)`);
+    status(`📡 API URL: ${creds.apiUrl}`);
+    status(`🔑 Credential: ${hint(creds.accessToken)}`);
+    if (creds.organizationId) {
+      status(`🏢 Workspace: ${creds.organizationId}`);
+    }
+    status(`📁 Credentials file: ${CREDENTIALS_FILE}`);
+  } else if (envKey) {
+    method = methodOf(envKey);
+    source = 'environment';
+    apiKey = envKey;
+    apiUrl = readEnv('API_URL') || DEFAULT_API_URL;
+    status(`🔑 Authentication method: ${label(method)} (${envName('API_KEY')})`);
+    status(`🔑 Credential: ${hint(envKey)}`);
+  } else {
+    status('❌ Not authenticated.');
+    status('');
+    status('Options:');
+    status(`  1. Device login: ${BRAND.cli} auth:login`);
+    status(`  2. New account: ${BRAND.cli} auth:signup --email <address>`);
+    status(`  3. API Key: export ${envName('API_KEY')}=your_api_key`);
+    result({ authenticated: false, reason: 'no-credentials' });
+    process.exit(1);
+  }
+
+  status('');
+  status('🔄 Verifying credentials...');
+
+  const workspaceId = getWorkspaceId();
+  const base = { method, source, apiUrl, workspace: workspaceId ?? null };
+
+  /*
+    THE PROBE IS `GET /subscription`, which answers for ANY valid credential,
+    including one whose workspace has no plan with API access yet. The old
+    probe (`GET /integrations`) is plan-gated, so a fresh `auth:signup` key
+    was reported as "expired or invalid" while it was fine and only waiting
+    for the payment.
+  */
+  let subscription: SubscriptionState;
+  try {
+    subscription = await new PostemiAPI({
+      apiKey,
+      apiUrl,
+      workspaceId,
+    }).getSubscription();
+  } catch (error: any) {
+    if (error instanceof ApiError && error.isWorkspaceChoice) {
+      status('✅ Credentials are valid, but this key spans several workspaces and none is selected.');
+      status(`   Run: ${BRAND.cli} workspaces:list, then ${BRAND.cli} workspaces:use <id>`);
+      result({ authenticated: true, ...base, reason: 'choose-workspace' });
+      process.exit(1);
+    }
+    if (error instanceof ApiError && error.status === 401) {
+      status('❌ Credentials are expired or invalid. Please re-authenticate.');
+      status(
+        creds
+          ? `   Run: ${BRAND.cli} auth:login`
+          : `   Update your ${envName('API_KEY')} environment variable.`
+      );
+      result({ authenticated: false, ...base, reason: 'rejected' });
+      process.exit(1);
+    }
+    if (error instanceof ApiError) {
+      /*
+        UNKNOWN, NOT INVALID. A 500 or a proxy error says nothing about the
+        credentials, so this reports that it could not check rather than
+        claiming they are bad, but it still exits 1, because a caller that
+        asked "are these good?" did not get a yes.
+      */
+      status(`⚠️  Could not verify credentials (HTTP ${error.status}): ${serverSentence(error.body)}`);
+      result({ authenticated: null, ...base, reason: `http-${error.status}` });
+      process.exit(1);
+    }
+    status(`⚠️  Could not reach API to verify credentials: ${error.message}`);
+    result({ authenticated: null, ...base, reason: 'unreachable' });
+    process.exit(1);
+  }
+
+  /*
+    VALID, BUT NO PLAN YET: said as its own answer. The credential works (exit
+    0), and every command except billing:* will be refused until the workspace
+    is on a plan with API access.
+  */
+  if (!subscription.apiAndMcpAccess) {
+    const noPlan =
+      subscription.state === 'none' ||
+      subscription.state === 'cancelled' ||
+      subscription.state === 'read_only';
+    status(
+      noPlan
+        ? '✅ Credentials are valid. This workspace has no plan yet, so only the billing commands work.'
+        : `✅ Credentials are valid. The current plan (${subscription.plan}) has no API access, so only the billing commands work.`
+    );
+    status(`   Next: ${BRAND.cli} billing:plans, then ${BRAND.cli} billing:subscribe --tier <slug> --period <monthly|yearly>`);
+    if (subscription.pendingCheckout) {
+      status(`   An unpaid checkout is waiting: ${subscription.pendingCheckout.checkoutUrl}`);
+    }
+    result({
+      authenticated: true,
+      ...base,
+      apiAccess: false,
+      plan: subscription.plan,
+      subscriptionState: subscription.state,
+      reason: noPlan ? 'no-plan' : 'plan-without-api-access',
+    });
+    return;
+  }
+
+  // A full answer: how many channels, when the key may read them.
+  let integrations: number | null = null;
+  try {
+    const list = (await new PostemiAPI({
+      apiKey,
+      apiUrl,
+      workspaceId,
+    }).listIntegrations()) as any[];
+    integrations = Array.isArray(list) ? list.length : null;
+  } catch {
+    // A scoped key without channels:read; the credential is still valid.
+  }
+
+  status(
+    `✅ Credentials are valid. Plan: ${subscription.plan ?? 'none'}${
+      integrations === null ? '' : `, ${integrations} channel(s) connected`
+    }.`
+  );
+  result({
+    authenticated: true,
+    ...base,
+    apiAccess: true,
+    plan: subscription.plan,
+    subscriptionState: subscription.state,
+    integrations,
+  });
+}

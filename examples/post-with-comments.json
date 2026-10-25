@@ -1,0 +1,55 @@
+{
+  "type": "schedule",
+  "date": "2026-01-15T12:00:00Z",
+  "shortLink": false,
+  "tags": [],
+  "posts": [
+    {
+      "integration": {
+        "id": "<your-integration-id>"
+      },
+      "value": [
+        {
+          "content": "This is the main post content 🚀",
+          "image": [
+            {
+              "id": "img1",
+              "path": "<the .path returned by: postemi upload main-image.jpg>"
+            },
+            {
+              "id": "img2",
+              "path": "<the .path returned by: postemi upload secondary-image.jpg>"
+            }
+          ]
+        },
+        {
+          "content": "This is the first comment with its own media 📸",
+          "image": [
+            {
+              "id": "img3",
+              "path": "<the .path returned by: postemi upload comment1-image.jpg>"
+            }
+          ],
+          "delay": 5
+        },
+        {
+          "content": "This is the second comment with different media 🎨",
+          "image": [
+            {
+              "id": "img4",
+              "path": "<the .path returned by: postemi upload comment2-image1.jpg>"
+            },
+            {
+              "id": "img5",
+              "path": "<the .path returned by: postemi upload comment2-image2.jpg>"
+            }
+          ],
+          "delay": 10
+        }
+      ],
+      "settings": {
+        "__type": "threads"
+      }
+    }
+  ]
+}

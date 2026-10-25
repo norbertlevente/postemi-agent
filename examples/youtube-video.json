@@ -1,0 +1,29 @@
+{
+  "type": "schedule",
+  "date": "2026-12-25T09:00:00Z",
+  "shortLink": false,
+  "tags": [],
+  "posts": [{
+    "integration": {
+      "id": "<your-youtube-integration-id>"
+    },
+    "value": [{
+      "content": "In this video we walk through setting up your weekly posting rhythm.\n\n⏱️ Chapters:\n0:00 – Intro\n2:15 – Setting up the calendar\n5:30 – Fine-tuning per channel\n10:45 – Scheduling\n\n🔔 Subscribe if this was useful!",
+      "image": [{
+        "id": "video1",
+        "path": "<the .path returned by: postemi upload video.mp4>"
+      }]
+    }],
+    "settings": {
+      "__type": "youtube",
+      "title": "Weekly posting rhythm in 15 minutes",
+      "type": "public",
+      "selfDeclaredMadeForKids": "no",
+      "tags": [
+        { "value": "postemi", "label": "Postemi" },
+        { "value": "scheduling", "label": "Scheduling" },
+        { "value": "social-media", "label": "Social media" }
+      ]
+    }
+  }]
+}

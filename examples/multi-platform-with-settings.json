@@ -1,0 +1,71 @@
+{
+  "type": "schedule",
+  "date": "2026-03-15T09:00:00Z",
+  "shortLink": false,
+  "tags": [
+    { "value": "product-launch", "label": "Product Launch" }
+  ],
+  "posts": [
+    {
+      "integration": { "id": "<your-x-integration-id>" },
+      "value": [
+        {
+          "content": "🚀 Our new feature is live!\n\nDetails in the thread 👇",
+          "image": [
+            { "id": "t1", "path": "<the .path returned by: postemi upload banner.jpg>" }
+          ]
+        },
+        {
+          "content": "1️⃣ One calendar for all your channels: X, Facebook, Instagram, Threads, Bluesky.",
+          "image": [],
+          "delay": 3
+        },
+        {
+          "content": "2️⃣ Different text per channel, from the same post.",
+          "image": [],
+          "delay": 3
+        }
+      ],
+      "settings": {
+        "__type": "x",
+        "who_can_reply_post": "everyone"
+      }
+    },
+    {
+      "integration": { "id": "<your-facebook-integration-id>" },
+      "value": [{
+        "content": "Our new feature is live. One calendar, every channel — details on our website.",
+        "image": [
+          { "id": "f1", "path": "<the .path returned by: postemi upload facebook.jpg>" }
+        ]
+      }],
+      "settings": {
+        "__type": "facebook",
+        "post_type": "post"
+      }
+    },
+    {
+      "integration": { "id": "<your-instagram-integration-id>" },
+      "value": [{
+        "content": "🚀 New feature!\n\nOne calendar, every channel.\n\n#socialmedia #scheduling",
+        "image": [
+          { "id": "i1", "path": "<the .path returned by: postemi upload instagram.jpg>" }
+        ]
+      }],
+      "settings": {
+        "__type": "instagram",
+        "post_type": "post"
+      }
+    },
+    {
+      "integration": { "id": "<your-threads-integration-id>" },
+      "value": [{
+        "content": "Our new feature is live. One calendar, every channel.",
+        "image": []
+      }],
+      "settings": {
+        "__type": "threads"
+      }
+    }
+  ]
+}

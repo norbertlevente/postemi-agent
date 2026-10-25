@@ -1,0 +1,17 @@
+{
+  "name": "postemi-agent",
+  "owner": {
+    "name": "Norbert Levente Kiss",
+    "email": "norbert@postemi.com"
+  },
+  "metadata": {
+    "description": "Postemi (postemi.com): write, schedule and publish social media posts from Cursor."
+  },
+  "plugins": [
+    {
+      "name": "postemi",
+      "source": "plugins/postemi-cursor",
+      "description": "Write, schedule and publish social media posts to 20 platforms through Postemi's MCP server, and announce releases from your changelog."
+    }
+  ]
+}

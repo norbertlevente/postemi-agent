@@ -1,0 +1,91 @@
+{
+  "type": "schedule",
+  "date": "2026-12-25T12:00:00Z",
+  "shortLink": false,
+  "tags": [
+    {
+      "value": "holiday",
+      "label": "Holiday"
+    },
+    {
+      "value": "marketing",
+      "label": "Marketing"
+    }
+  ],
+  "posts": [
+    {
+      "integration": {
+        "id": "<your-x-integration-id>"
+      },
+      "value": [
+        {
+          "content": "Happy Holidays! 🎄 Check out our special offers!",
+          "image": [
+            {
+              "id": "holiday1",
+              "path": "<the .path returned by: postemi upload holiday-twitter.jpg>"
+            }
+          ]
+        },
+        {
+          "content": "Limited time offer - 50% off! 🎁",
+          "image": [],
+          "delay": 60
+        }
+      ],
+      "settings": {
+        "__type": "x",
+        "who_can_reply_post": "everyone"
+      }
+    },
+    {
+      "integration": {
+        "id": "<your-threads-integration-id>"
+      },
+      "value": [
+        {
+          "content": "Season's greetings from our team! We're offering exclusive holiday promotions.",
+          "image": [
+            {
+              "id": "holiday2",
+              "path": "<the .path returned by: postemi upload holiday-linkedin.jpg>"
+            }
+          ]
+        }
+      ],
+      "settings": {
+        "__type": "threads"
+      }
+    },
+    {
+      "integration": {
+        "id": "<your-facebook-integration-id>"
+      },
+      "value": [
+        {
+          "content": "🎅 Happy Holidays! Special announcement in the comments!",
+          "image": [
+            {
+              "id": "holiday3",
+              "path": "<the .path returned by: postemi upload holiday-facebook-main.jpg>"
+            }
+          ]
+        },
+        {
+          "content": "Our holiday sale is now live! Visit our website for amazing deals 🎁",
+          "image": [
+            {
+              "id": "holiday4",
+              "path": "<the .path returned by: postemi upload holiday-sale-banner.jpg>"
+            }
+          ],
+          "delay": 30
+        }
+      ],
+      "settings": {
+        "__type": "facebook",
+        "post_type": "post"
+      }
+    }
+  ]
+}
