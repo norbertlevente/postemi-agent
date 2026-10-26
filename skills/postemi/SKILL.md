@@ -1,6 +1,6 @@
 ---
 name: postemi
-description: Postemi schedules and publishes social posts from the command line to 20 platforms, including Facebook, Instagram, X, LinkedIn, TikTok, YouTube, Threads, Bluesky, Pinterest and Mastodon.
+description: Postemi schedules and publishes social posts from the command line to 25+ platforms, including Facebook, Instagram, X, LinkedIn, TikTok, YouTube, Threads, Bluesky, Pinterest and Mastodon.
 homepage: https://postemi.com
 metadata: {"openclaw":{"emoji":"🌎","requires":{"bins":[],"env":[]}}}
 ---
@@ -33,36 +33,58 @@ MCP server, for chat clients without a terminal: https://mcp.postemi.com/mcp
 
 **Only these. Do not offer a user anything else, and do not try to post to it.**
 Postemi's server carries inherited code for many more providers; that code is not
-enabled and not supported.
+enabled and not supported. Postemi adds channels over time, so
+`integrations:list` (below) can show one that is not in this table yet.
 
-| Channel | `identifier` |
-|---|---|
-| X (Twitter) | `x` |
-| Facebook (Pages) | `facebook` |
-| Instagram | `instagram` |
-| LinkedIn (member feed) | `linkedin` |
-| TikTok | `tiktok` |
-| YouTube | `youtube` |
-| Threads | `threads` |
-| Bluesky | `bluesky` |
-| Telegram | `telegram` |
-| Discord | `discord` |
-| Slack | `slack` |
-| Pinterest (BETA) | `pinterest` |
+| Channel | `identifier` | Status |
+|---|---|---|
+| X (Twitter) | `x` | Live |
+| Facebook (Pages) | `facebook` | Live |
+| Instagram (business account through a Facebook Page) | `instagram` | Live |
+| Instagram (professional account, no Facebook Page) | `instagram-standalone` | Live |
+| LinkedIn (member feed) | `linkedin` | Live |
+| TikTok | `tiktok` | Live |
+| YouTube | `youtube` | Live |
+| Threads | `threads` | Live |
+| Bluesky | `bluesky` | Live |
+| Telegram | `telegram` | Live |
+| Discord | `discord` | Live |
+| Slack | `slack` | Live |
+| Pinterest | `pinterest` | BETA |
+| Mastodon (mastodon.social) | `mastodon` | BETA |
+| Mastodon (any other server) | `mastodon-custom` | BETA |
+| Pixelfed (any server) | `pixelfed` | BETA |
+| WordPress (your own site) | `wordpress` | BETA |
+| Tumblr | `tumblr` | BETA |
+| Dev.to | `devto` | BETA |
+| Ghost (your own site) | `ghost` | BETA |
+| Google Chat (a space, by webhook) | `google-chat` | BETA |
+| Microsoft Teams (a channel, by webhook) | `microsoft-teams` | BETA |
+| Google Business Profile | `gmb` | Coming soon, not schedulable yet |
+| LinkedIn Pages (company pages) | `linkedin-page` | Coming soon, not schedulable yet |
 
 **Pinterest is a BETA channel.** Until Pinterest grants Postemi Standard access, a
 pin is visible only to the account that created it. Tell the user this before
 you schedule a pin. A pin needs a `board` id in `--settings`; get the ids with
 `postemi integrations:trigger <integration-id> boards` (see PROVIDER_SETTINGS.md).
 
+**The other BETA channels** connect and publish, but Postemi has not tried them
+with many real accounts yet. Say so when the user picks one. Most need
+settings (a title for WordPress, Dev.to and Ghost; a picture for Pixelfed);
+see PROVIDER_SETTINGS.md.
+
+**Google Business Profile and LinkedIn Pages are coming soon.** Those platforms
+have not approved Postemi yet, so the user cannot connect them. Do not schedule
+for them; personal LinkedIn profiles (`linkedin`) work today.
+
 **`integrations:list` is the truth.** The table says what Postemi supports; that
 command says what THIS user has actually connected. Check it before you
 schedule anything, and never post to an id that is not in its output.
 
-**Never assume another provider exists.** If a user asks for Mastodon, Reddit,
-Google Business Profile, Medium, Dev.to, WordPress, Tumblr, Farcaster or
-anything else, the answer is that Postemi does not offer it. Do not
-build a `--settings` payload for it.
+**Never assume another provider exists.** If a user asks for Reddit, Medium,
+Farcaster, Hashnode, Lemmy, Nostr, VK, a newsletter service or anything else
+that is not in the table, the answer is that Postemi does not offer it today.
+Do not build a `--settings` payload for it.
 
 ---
 
@@ -106,7 +128,8 @@ If not authenticated:
    You never see or handle a key.
 2. **No account yet:** `postemi auth:signup` creates one, see below. Only when
    the user asks you to create a Postemi account for them. They can also sign
-   up at https://postemi.com/app/signup and then run `postemi auth:login`.
+   up at https://postemi.com/app/signup, which starts a 7-day free trial, and
+   then run `postemi auth:login`.
 
 ### Creating an account for the user (no free trial)
 
@@ -518,9 +541,10 @@ postemi posts:create -c "Content" -s "2026-12-31T12:00:00Z" -m "$VIDEO_PATH" -i 
 ### Pattern 1: Discover & Use Integration Tools
 
 **Most supported channels have no tools at all.** Of the channels in the table
-at the top of this file, four expose a tool: Instagram (`audioSearch`),
-Discord (`channels`), Slack (`channels`) and Pinterest (`boards`). X, Facebook, Threads, Bluesky,
-YouTube, LinkedIn, TikTok and Telegram expose none: `integrations:settings`
+at the top of this file, six expose a tool: Instagram (`audioSearch`),
+Discord (`channels`), Slack (`channels`), Pinterest (`boards`), WordPress
+(`postTypes`, `categoriesList`, `tagsList`) and Dev.to (`tags`,
+`organizations`). The others expose none: `integrations:settings`
 returns an empty `tools` array for them, and `integrations:trigger` on them
 returns `404 Tool not found`.
 

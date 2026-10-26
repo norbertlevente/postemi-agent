@@ -3,15 +3,16 @@
 Every channel Postemi supports, and every field its `--settings` payload accepts.
 
 **The channels below are the whole list.** Postemi's server carries inherited
-code for many other providers — Reddit, Mastodon, Medium, Dev.to, Hashnode,
-WordPress, Lemmy, Nostr, VK, Tumblr, Dribbble, Farcaster and others.
-None of them are enabled or supported. Do not build a settings payload for one.
+code for many other providers: Reddit, Medium, Hashnode, Lemmy, Nostr, VK,
+Dribbble, Farcaster and others. None of them are enabled or supported. Do not
+build a settings payload for one.
 
 | Channel | `__type` | Has settings? | Status |
 |---|---|---|---|
 | X (Twitter) | `x` | yes | Publishing verified |
 | Facebook | `facebook` | yes, all optional | Publishing verified |
 | Instagram | `instagram` | yes | Publishing verified |
+| Instagram (no Facebook Page) | `instagram-standalone` | yes, same as Instagram | Live |
 | Threads | `threads` | **no** | Publishing verified |
 | Bluesky | `bluesky` | **no** | Publishing verified |
 | LinkedIn | `linkedin` | yes, all optional | Publishing verified |
@@ -21,6 +22,17 @@ None of them are enabled or supported. Do not build a settings payload for one.
 | YouTube | `youtube` | yes | Publishing verified |
 | TikTok | `tiktok` | yes | Publishing verified |
 | Pinterest | `pinterest` | yes, `board` required | BETA: pins visible only to their creator until Pinterest grants Standard access |
+| Mastodon (mastodon.social) | `mastodon` | **no** | BETA |
+| Mastodon (any other server) | `mastodon-custom` | **no** | BETA |
+| Pixelfed | `pixelfed` | **no** | BETA |
+| WordPress | `wordpress` | yes, `title` and `type` required | BETA |
+| Tumblr | `tumblr` | yes, all optional | BETA |
+| Dev.to | `devto` | yes, `title` required | BETA |
+| Ghost | `ghost` | yes, `title` required | BETA |
+| Google Chat | `google-chat` | **no** | BETA |
+| Microsoft Teams | `microsoft-teams` | **no** | BETA |
+| Google Business Profile | `gmb` | yes, all optional | Coming soon, not schedulable yet |
+| LinkedIn Pages | `linkedin-page` | yes, same as LinkedIn | Coming soon, not schedulable yet |
 
 Source of truth for everything on this page:
 `libraries/nestjs-libraries/src/dtos/posts/providers-settings/*.ts` in the Postemi
@@ -337,6 +349,169 @@ postemi posts:create -c "Autumn recipes" -m "$IMG" -s "2026-12-31T12:00:00Z" \
 
 ---
 
+## Instagram without a Facebook Page: `instagram-standalone`
+
+The same settings as `instagram` (`post_type` required, the rest optional).
+The `audioSearch` tool is not available on this channel: it exists only on
+`instagram`.
+
+```bash
+IMG=$(postemi upload photo.jpg | jq -r '.path')
+postemi posts:create -c "New menu" -s "2026-12-31T12:00:00Z" \
+  --settings '{"post_type":"post"}' -m "$IMG" -i "$IGS_ID"
+```
+
+---
+
+## Mastodon: `mastodon` and `mastodon-custom`
+
+**No settings.** Same as Threads. `mastodon` is an account on mastodon.social;
+`mastodon-custom` is an account on any other Mastodon server, chosen when the
+user connects it. A post is at most 500 characters on mastodon.social (other
+servers can set their own limit).
+
+```bash
+postemi posts:create -c "Post text" -s "2026-12-31T12:00:00Z" -i "$MASTODON_ID"
+```
+
+---
+
+## Pixelfed: `pixelfed`
+
+**No settings.** Pixelfed is a photo network on any server, chosen when the
+user connects it. Every post needs at least one picture and takes at most 4
+(JPEG, PNG or GIF; no video). The caption is at most 500 characters.
+
+```bash
+IMG=$(postemi upload photo.jpg | jq -r '.path')
+postemi posts:create -c "Morning light" -s "2026-12-31T12:00:00Z" -m "$IMG" -i "$PIXELFED_ID"
+```
+
+---
+
+## WordPress: `wordpress`
+
+The post's `-c` content becomes the article body (HTML).
+
+| Field | Required | Values |
+|---|---|---|
+| `title` | **yes** | at least 2 characters |
+| `type` | **yes** | a post type id from the `postTypes` tool, e.g. `posts` or `pages` |
+| `main_image` | no | A media object from `postemi upload` (the featured image) |
+| `categories` | no | array of category ids (numbers) from the `categoriesList` tool |
+| `tags` | no | array of tag ids (numbers) from the `tagsList` tool |
+| `status` | no | `publish` (default), `draft`, `pending`, `private` |
+
+```bash
+postemi integrations:trigger "$WP_ID" postTypes | jq '.output'
+postemi integrations:trigger "$WP_ID" categoriesList | jq '.output'
+postemi integrations:trigger "$WP_ID" tagsList | jq '.output'
+postemi posts:create -c "<p>Our autumn menu is here.</p>" -s "2026-12-31T12:00:00Z" \
+  --settings '{"title":"Autumn menu","type":"posts","categories":[3],"tags":[12,14]}' \
+  -i "$WP_ID"
+```
+
+---
+
+## Tumblr: `tumblr`
+
+All fields optional. The blog is chosen when the user connects the channel.
+
+| Field | Values |
+|---|---|
+| `title` | 1 to 4096 characters, shown as the heading of the post |
+| `link` | A URL, added to the post as a link block |
+| `sourceUrl` | A URL, the post's source |
+| `tags` | comma separated tags, at most 4096 characters |
+
+```bash
+postemi posts:create -c "Post text" -s "2026-12-31T12:00:00Z" \
+  --settings '{"title":"Autumn menu","tags":"food,autumn"}' -i "$TUMBLR_ID"
+```
+
+---
+
+## Dev.to: `devto`
+
+The post's `-c` content becomes the article body (Markdown). The article is
+published at the scheduled time.
+
+| Field | Required | Values |
+|---|---|---|
+| `title` | **yes** | at least 2 characters |
+| `main_image` | no | A media object from `postemi upload` (the cover image) |
+| `canonical` | no | A URL, the original of the article |
+| `organization` | no | an organization id from the `organizations` tool, as a string |
+| `tags` | no | up to 4 items of `{ "value": <number>, "label": "<name>" }` from the `tags` tool |
+
+```bash
+postemi integrations:trigger "$DEVTO_ID" tags | jq '.output[:5]'
+postemi integrations:trigger "$DEVTO_ID" organizations | jq '.output'
+postemi posts:create -c "## Why we built it..." -s "2026-12-31T12:00:00Z" \
+  --settings '{"title":"Shipping a CLI","tags":[{"value":8,"label":"javascript"}]}' \
+  -i "$DEVTO_ID"
+```
+
+---
+
+## Ghost: `ghost`
+
+The post's `-c` content becomes the article body (HTML).
+
+| Field | Required | Values |
+|---|---|---|
+| `title` | **yes** | 1 to 255 characters |
+| `status` | no | `published` (default, at the scheduled time) or `draft` (a Ghost draft) |
+| `tags` | no | comma separated tag names, at most 1000 characters |
+| `excerpt` | no | at most 300 characters |
+| `main_image` | no | A media object from `postemi upload` (the feature image) |
+
+```bash
+postemi posts:create -c "<p>Our autumn menu is here.</p>" -s "2026-12-31T12:00:00Z" \
+  --settings '{"title":"Autumn menu","tags":"menu,autumn","excerpt":"What is new this season."}' \
+  -i "$GHOST_ID"
+```
+
+---
+
+## Google Chat and Microsoft Teams: `google-chat`, `microsoft-teams`
+
+**No settings.** Same as Threads. The space (Google Chat) or the channel
+(Teams) is fixed by the webhook the user gives when connecting. A message is
+at most 4096 characters on Google Chat and 10000 on Teams.
+
+```bash
+postemi posts:create -c "Release notes are out" -s "2026-12-31T12:00:00Z" -i "$GCHAT_ID"
+```
+
+---
+
+## Google Business Profile: `gmb` (coming soon)
+
+**Not schedulable yet:** Google has not approved Postemi, so the user cannot
+connect it. For reference, the settings the server accepts, all optional:
+
+| Field | Values |
+|---|---|
+| `topicType` | `STANDARD`, `EVENT`, `OFFER` |
+| `callToActionType` | `NONE`, `BOOK`, `ORDER`, `SHOP`, `LEARN_MORE`, `SIGN_UP`, `GET_OFFER`, `CALL` |
+| `callToActionUrl` | A URL, checked when `callToActionType` is set |
+| `eventTitle` | string, for `EVENT` |
+| `eventStartDate`, `eventEndDate`, `eventStartTime`, `eventEndTime` | strings |
+| `offerCouponCode`, `offerTerms` | strings, for `OFFER` |
+| `offerRedeemUrl` | A URL |
+
+A post takes at most one image and no video.
+
+---
+
+## LinkedIn Pages: `linkedin-page` (coming soon)
+
+**Not schedulable yet:** LinkedIn has not approved Postemi for company pages.
+When it does, the settings are the same as `linkedin`.
+
+---
+
 ## Finding your integration ids
 
 ```bash
@@ -353,7 +528,8 @@ YT_ID=$(postemi integrations:list | jq -r '.[] | select(.identifier=="youtube") 
 If a channel is not in `integrations:list`, the user cannot post to it. For
 Google Business Profile and LinkedIn company pages that is the expected state
 until those platforms approve the app (personal LinkedIn profiles work).
-Pinterest is live as a BETA channel. Say so rather than scheduling a post that will fail.
+Pinterest and the other BETA channels are live. Say so rather than scheduling
+a post that will fail.
 
 ---
 

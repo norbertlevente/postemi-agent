@@ -7,7 +7,7 @@ command-line tool. It uses the same public API as the web app: what you
 schedule here shows up in your Postemi calendar, and what you schedule there
 you can see here too.
 
-Channels: 20 platforms, including Facebook, Instagram, X, LinkedIn, TikTok, YouTube, Threads, Bluesky, Pinterest and Mastodon.
+Channels: 25+ platforms, including Facebook, Instagram, X, LinkedIn, TikTok, YouTube, Threads, Bluesky, Pinterest and Mastodon.
 
 Plan: the CLI, the API and MCP need the Pro plan or higher (Pro, Creator or
 Team). Basic has no API access.
@@ -45,9 +45,10 @@ postemi auth:signup --email anna@example.com --code 123456 --accept-terms --work
 ```
 
 The person must agree to https://postemi.com/terms and
-https://postemi.com/privacy first. There is no free trial: next come
-`postemi billing:plans` and `postemi billing:subscribe`. You can also sign up
-at https://postemi.com/app/signup and then run `postemi auth:login`.
+https://postemi.com/privacy first. An account made with `postemi auth:signup`
+has no free trial: next come `postemi billing:plans` and
+`postemi billing:subscribe`. Signing up at https://postemi.com/app/signup
+instead starts a 7-day free trial; then run `postemi auth:login`.
 
 For a server, CI or an agent without a browser, use an API key from
 Settings, Developers in the web app:

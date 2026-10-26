@@ -1,7 +1,7 @@
 # Postemi: Social Media Scheduler (Claude plugin)
 
 Connects Claude to Postemi (https://postemi.com) over MCP, so Claude can write,
-schedule and publish social media posts to 20 platforms, including Facebook,
+schedule and publish social media posts to 25+ platforms, including Facebook,
 Instagram, X, LinkedIn, TikTok, YouTube, Threads, Bluesky, Pinterest and
 Mastodon, with a content calendar and photo and video uploads in full
 quality. Browser sign-in, no key.
