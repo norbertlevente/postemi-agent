@@ -18,6 +18,11 @@ for the workspace you want Grok to use. Do not paste an API key into the chat.
 - Commands `/announce-release` (posts about the latest release, from the
   changelog) and `/schedule-post`.
 
+## Requirements
+
+A Postemi account on the Pro plan or higher (Pro, Creator or Team). Basic has
+no API or MCP access.
+
 ## Authentication and network endpoints
 
 The plugin connects only to Postemi:

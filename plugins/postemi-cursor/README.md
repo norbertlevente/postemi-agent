@@ -17,7 +17,8 @@ confirm.
 ## Requirements
 
 - A Postemi account at [postemi.com](https://postemi.com) with your social channels
-  connected, on a workspace whose plan includes API access.
+  connected, on the Pro plan or higher (Pro, Creator or Team). Basic has no
+  API or MCP access.
 - Channels are connected in Postemi itself, not from Cursor.
 
 ## Try it

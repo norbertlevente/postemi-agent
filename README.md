@@ -9,6 +9,9 @@ you can see here too.
 
 Channels: 20 platforms, including Facebook, Instagram, X, LinkedIn, TikTok, YouTube, Threads, Bluesky, Pinterest and Mastodon.
 
+Plan: the CLI, the API and MCP need the Pro plan or higher (Pro, Creator or
+Team). Basic has no API access.
+
 [`SKILL.md`](./SKILL.md) is the full command reference, written for AI agents.
 Show it to Claude, ChatGPT, Codex, OpenClaw or Hermes and they can use the
 whole CLI with no further explanation.

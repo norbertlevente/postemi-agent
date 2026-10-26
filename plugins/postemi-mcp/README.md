@@ -18,8 +18,8 @@ Code, or the sign-in prompt in the desktop app).
 
 ## Requirements
 
-- A Postemi account (https://postemi.com/app/login) on a plan with API and
-  MCP access.
+- A Postemi account (https://postemi.com/app/login) on the Pro plan or higher
+  (Pro, Creator or Team). Basic has no API or MCP access.
 - At least one channel connected in Postemi. Claude cannot connect a social
   account.
 
