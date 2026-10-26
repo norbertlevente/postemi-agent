@@ -50,7 +50,7 @@ enabled and not supported. Postemi adds channels over time, so
 | Telegram | `telegram` | Live |
 | Discord | `discord` | Live |
 | Slack | `slack` | Live |
-| Pinterest | `pinterest` | BETA |
+| Pinterest | `pinterest` | Coming soon, not schedulable yet |
 | Mastodon (mastodon.social) | `mastodon` | BETA |
 | Mastodon (any other server) | `mastodon-custom` | BETA |
 | Pixelfed (any server) | `pixelfed` | BETA |
@@ -63,10 +63,10 @@ enabled and not supported. Postemi adds channels over time, so
 | Google Business Profile | `gmb` | Coming soon, not schedulable yet |
 | LinkedIn Pages (company pages) | `linkedin-page` | Coming soon, not schedulable yet |
 
-**Pinterest is a BETA channel.** Until Pinterest grants Postemi Standard access, a
-pin is visible only to the account that created it. Tell the user this before
-you schedule a pin. A pin needs a `board` id in `--settings`; get the ids with
-`postemi integrations:trigger <integration-id> boards` (see PROVIDER_SETTINGS.md).
+**Pinterest is coming soon.** Postemi customers cannot connect it until Pinterest
+approves Postemi's app, so it never appears in `integrations:list`. Tell the user
+it is not available yet. (When it opens, a pin needs a `board` id in
+`--settings`; see PROVIDER_SETTINGS.md.)
 
 **The other BETA channels** connect and publish, but Postemi has not tried them
 with many real accounts yet. Say so when the user picks one. Most need

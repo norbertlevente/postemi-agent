@@ -21,7 +21,7 @@ build a settings payload for one.
 | Slack | `slack` | yes, `channel` required | Publishing verified |
 | YouTube | `youtube` | yes | Publishing verified |
 | TikTok | `tiktok` | yes | Publishing verified |
-| Pinterest | `pinterest` | yes, `board` required | BETA: pins visible only to their creator until Pinterest grants Standard access |
+| Pinterest | `pinterest` | yes, `board` required | Coming soon: cannot be connected until Pinterest approves Postemi's app |
 | Mastodon (mastodon.social) | `mastodon` | **no** | BETA |
 | Mastodon (any other server) | `mastodon-custom` | **no** | BETA |
 | Pixelfed | `pixelfed` | **no** | BETA |
@@ -326,8 +326,8 @@ postemi posts:create -c "Release notes are out" -s "2026-12-31T12:00:00Z" \
 
 ## Pinterest — `pinterest`
 
-**BETA.** Until Pinterest grants Postemi Standard access, a pin is visible only
-to the account that created it. Tell the user before you schedule one.
+**Coming soon.** Postemi customers cannot connect Pinterest until Pinterest
+approves Postemi's app. The settings below apply once it opens.
 
 | Field | Values |
 |---|---|
@@ -528,7 +528,7 @@ YT_ID=$(postemi integrations:list | jq -r '.[] | select(.identifier=="youtube") 
 If a channel is not in `integrations:list`, the user cannot post to it. For
 Google Business Profile and LinkedIn company pages that is the expected state
 until those platforms approve the app (personal LinkedIn profiles work).
-Pinterest and the other BETA channels are live. Say so rather than scheduling
+The BETA channels are live. Say so rather than scheduling
 a post that will fail.
 
 ---
