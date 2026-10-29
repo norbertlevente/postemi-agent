@@ -112,7 +112,7 @@ Starting points, not laws. The best cadence is the one the user can keep.
 
 | Network | Suggested rhythm | Notes |
 |---|---|---|
-| X | 1 to 3 short posts a day; a thread or long post 1 to 2 times a week. More if the user can keep up. | Every post and thread entry counts toward the account's monthly X allowance in Postemi: check what is left before a busy plan. |
+| X | At least 2 short posts a day, 5 days a week; to grow faster, 3 to 5 a day, 7 days a week, plus 2 or more threads or long posts a week. Text with an image or video does best. | Every post and thread entry counts toward the account's monthly X allowance in Postemi, so tell the user how many are left when the plan needs more. |
 | LinkedIn | 1 post a day at most, 3 to 5 a week is plenty. | Posting more does not grow faster here. Mornings in the audience's timezone work well. Do not go weeks without posting. |
 | Instagram | 3 to 5 feed posts or Reels a week, Stories in between. | Reels for reach, carousels for saves. |
 | TikTok | Up to 1 or 2 a day. | Postemi allows about 15 posts per account in 24 hours. |
