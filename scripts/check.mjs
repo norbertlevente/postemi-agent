@@ -7,9 +7,13 @@
        package ships; skills/postemi/SKILL.md, the one ClawHub and skills.sh
        read; plugins/postemi-cli/skills/postemi/SKILL.md, the Claude Code
        plugin's). The shared skills (postemi-writing, postemi-growth,
-       postemi-templates) are identical in every plugin that ships skills
-       (scripts/sync-skills.mjs copies them), every relative link in them
+       postemi-templates) are identical in every plugin that ships them
+       (scripts/sync-skills.mjs: writing and templates in the main plugins,
+       growth only in the optional postemi-growth plugin), no plugin has a
+       shared skill it should not have, every relative link in them
        resolves, and they hold no em or en dashes.
+    2b. The optional postemi-growth plugin is listed in the Claude Code and
+       Cursor marketplaces, and its manifests parse.
     3. No file names the other brand or its region: the npm package files
        (from `npm pack --dry-run`, so dist/ too) and every file in git, except
        this one and the server's tool names the ChatGPT skills must use.
@@ -19,7 +23,7 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { SHARED_SKILLS, SKILL_PLUGINS } from './sync-skills.mjs';
+import { PLUGIN_SKILLS, SHARED_SKILLS } from './sync-skills.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const failures = [];
@@ -68,8 +72,17 @@ for (const name of SHARED_SKILLS) {
       }
     }
   }
-  for (const plugin of SKILL_PLUGINS) {
+  for (const [plugin, wanted] of Object.entries(PLUGIN_SKILLS)) {
     const copyDir = join(root, 'plugins', plugin, 'skills', name);
+    if (!wanted.includes(name)) {
+      try {
+        statSync(copyDir);
+        fail(`plugins/${plugin}/skills/${name} should not be there (run pnpm sync:skills)`);
+      } catch {
+        // absent, as it should be
+      }
+      continue;
+    }
     let copyFiles = [];
     try {
       copyFiles = walk(copyDir).map((f) => relative(copyDir, f)).sort();
@@ -81,6 +94,26 @@ for (const name of SHARED_SKILLS) {
       copyFiles.length === files.length &&
       files.every((f, i) => copyFiles[i] === f && readFileSync(join(dir, f), 'utf8') === readFileSync(join(copyDir, f), 'utf8'));
     if (!same) fail(`plugins/${plugin}/skills/${name} differs from skills/${name} (run pnpm sync:skills)`);
+  }
+}
+
+// 2b. The optional growth plugin in the marketplaces
+for (const [file, source] of [
+  ['.claude-plugin/marketplace.json', './plugins/postemi-growth'],
+  ['.cursor-plugin/marketplace.json', 'plugins/postemi-growth'],
+]) {
+  const listed = JSON.parse(readFileSync(join(root, file), 'utf8')).plugins ?? [];
+  if (!listed.some((p) => p.name === 'postemi-growth' && p.source === source)) {
+    fail(`${file} does not list postemi-growth at ${source}`);
+  }
+}
+for (const manifest of ['.claude-plugin/plugin.json', '.cursor-plugin/plugin.json', '.grok-plugin/plugin.json']) {
+  try {
+    if (JSON.parse(readFileSync(join(root, 'plugins/postemi-growth', manifest), 'utf8')).name !== 'postemi-growth') {
+      fail(`plugins/postemi-growth/${manifest}: name is not postemi-growth`);
+    }
+  } catch (error) {
+    fail(`plugins/postemi-growth/${manifest}: ${error.message}`);
   }
 }
 

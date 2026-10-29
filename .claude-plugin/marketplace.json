@@ -5,7 +5,7 @@
     "email": "norbert@postemi.com"
   },
   "metadata": {
-    "description": "Postemi (postemi.com) plugins: the MCP connector for chat, and the CLI for coding agents.",
+    "description": "Postemi (postemi.com) plugins: the MCP connector for chat, the CLI for coding agents, and the optional growth skill.",
     "version": "1.0.1"
   },
   "plugins": [
@@ -19,6 +19,12 @@
       "name": "postemi-cli",
       "source": "./plugins/postemi-cli",
       "description": "Postemi CLI for coding agents: the postemi command line tool and its full reference, for scheduling and publishing social posts from a terminal, a script or an agent with a shell (Claude Code, Codex, OpenClaw, Hermes).",
+      "strict": true
+    },
+    {
+      "name": "postemi-growth",
+      "source": "./plugins/postemi-growth",
+      "description": "Optional Postemi skill: grow an audience on social media. Choosing networks and a first niche, a 30-day posting test, cadence per network, reading the numbers, 30 post angles for one topic, repurposing, bios and profile links, and a weekly review. Install it next to the Postemi plugin (MCP or CLI), which schedules the posts.",
       "strict": true
     }
   ]

@@ -7,9 +7,11 @@ Mastodon, with a content calendar and photo and video uploads in full
 quality. Browser sign-in, no key.
 
 Also included: the skills `postemi-writing` (how to write posts that get
-read), `postemi-growth` (how to grow an audience: niche, cadence, content
-plan, numbers) and `postemi-templates` (the Postemi template and hook
-library).
+read) and `postemi-templates` (the Postemi template and hook library).
+
+Optional: `postemi-growth` (how to grow an audience: niche, cadence, content
+plan, numbers) is its own plugin, so install it only if you want it:
+`claude plugin install postemi-growth@postemi-agent`.
 
 ## Install
 

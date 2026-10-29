@@ -8,6 +8,7 @@ import { assertIanaTimezone } from '../dates';
 import { ApiError, PostemiAPI, serverSentence, SubscriptionState, Workspace } from '../api';
 import { getWorkspaceId } from '../config';
 import { BRAND, envName, networkError, readEnv } from '../brand';
+import { offerSkillsAfterLogin } from './skills';
 
 const CREDENTIALS_DIR = join(homedir(), BRAND.configDirName);
 const CREDENTIALS_FILE = join(CREDENTIALS_DIR, 'credentials.json');
@@ -286,6 +287,7 @@ export async function authLogin(argv: any) {
         console.log(`📁 Credentials saved to ${CREDENTIALS_FILE}`);
         await chooseWorkspace(creds);
         await maybeConfigureTimezone();
+        await offerSkillsAfterLogin(argv);
         return;
       }
 

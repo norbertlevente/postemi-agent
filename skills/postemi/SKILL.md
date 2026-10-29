@@ -1003,6 +1003,31 @@ State these plainly rather than attempting a workaround.
 
 ---
 
+## Optional skills: writing and growth
+
+Two more Postemi skills are optional. They are not installed unless the user
+chose them:
+
+| Skill | What it adds | Install |
+|---|---|---|
+| writing (`postemi-writing` + `postemi-templates`) | post ideas, hooks, formatting, each network's writing rules, the composer's templates | `postemi skills add writing` |
+| growth (`postemi-growth`) | choosing a niche, cadence per network, a 30-day plan, the weekly review | `postemi skills add growth` |
+
+```bash
+postemi skills list                          # core + optional, and where each is installed (JSON)
+postemi skills add writing --json            # into every agent found (Claude Code, Codex, Cursor, Grok Build)
+postemi skills add growth --agent claude --json
+postemi skills remove growth --json
+```
+
+When the user asks for help writing posts or planning content and
+`postemi skills list` shows the skill as missing, **offer** it: say what it
+adds and ask. Run `postemi skills add` only after the user says yes; never
+install it silently. Pass `--json` (or run without a terminal) so the CLI asks
+no questions; a new agent session loads the skills.
+
+---
+
 ## Supporting Resources
 
 **This file is the command reference.** Everything the CLI accepts is
@@ -1085,6 +1110,10 @@ postemi analytics:post <id> -d 30                 # Post analytics (30 days)
 # If analytics:post returns {"missing": true}, resolve it:
 postemi posts:missing <id>                         # List provider content
 postemi posts:connect <id> --release-id "<rid>"    # Connect content to post
+
+# Optional skills (ask the user first)
+postemi skills list                                # Core + optional skills, where installed
+postemi skills add writing|growth --json           # Install an optional skill
 
 # Help
 postemi --help                                     # Show help

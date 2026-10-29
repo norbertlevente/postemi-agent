@@ -70,3 +70,6 @@ id_rsa*
 .firecrawl/
 .aider*
 
+
+# Unit test build (scripts/unit-tests.mjs)
+.test-build/

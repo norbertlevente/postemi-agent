@@ -7,7 +7,9 @@ description: Grow an audience and get results from social posting with Postemi. 
 
 This skill is the plan; `postemi-writing` is how each post is written,
 `postemi-templates` has ready drafts, and the main `postemi` skill has the
-tools and commands. Reference files:
+tools and commands. If the writing skills are not installed, write the posts
+with the rules of the main skill and offer `postemi skills add writing` (ask
+the user first). Reference files:
 
 - [reference/30-angles.md](./reference/30-angles.md): 30 ways to post about
   one topic, with a worked example.

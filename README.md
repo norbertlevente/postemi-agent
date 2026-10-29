@@ -83,6 +83,28 @@ postemi posts:create -c "Hello from the terminal" -m "$IMG" \
 Results are JSON on stdout; status lines and errors go to stderr, and every
 failure exits 1. Run `postemi <command> --help` for each command.
 
+## Agent skills (optional)
+
+The CLI can install its skills into the coding agents on your machine
+(Claude Code `~/.claude/skills`, Codex `~/.codex/skills` or
+`$CODEX_HOME/skills`, Cursor `~/.cursor/skills`, Grok Build
+`~/.grok/skills`). The core `postemi` skill comes with any of them; the other
+two are optional:
+
+```bash
+postemi skills list                    # core, writing, growth: installed where
+postemi skills add writing             # ideas, hooks, formatting, templates
+postemi skills add growth              # niche, cadence, 30-day plan
+postemi skills add all --agent claude --yes
+postemi skills remove growth
+```
+
+After `postemi auth:login` on a terminal the CLI asks once whether you want
+the writing and the growth skill (default No) and remembers the answers in
+`~/.postemi/config.json`. It never asks when an agent or a script runs it (no
+terminal, `--json`, or `CI` set); it prints one hint line instead, once.
+With several agents found it asks which; `--agent` and `--yes` skip that.
+
 ## More
 
 - [`SKILL.md`](./SKILL.md): every command, flag and rule
@@ -104,6 +126,7 @@ This repository also holds the Postemi plugins, in [`plugins/`](./plugins):
 | [`plugins/postemi-chatgpt`](./plugins/postemi-chatgpt) | ChatGPT | The ChatGPT app package |
 | [`plugins/postemi-cursor`](./plugins/postemi-cursor) | Cursor | MCP server, skill and commands |
 | [`plugins/postemi-grok`](./plugins/postemi-grok) | Grok Build | MCP server, skill and commands |
+| [`plugins/postemi-growth`](./plugins/postemi-growth) | Claude Code, Cursor, Grok Build | Optional: the growth skill only |
 
 In Claude Code:
 
@@ -118,25 +141,30 @@ The skill on its own (for OpenClaw and other agents) is
 
 ### Writing and growth skills
 
-Three more skills help the agent write the posts, not only schedule them.
-Every plugin above ships them:
+Three more skills help the agent write the posts, not only schedule them:
 
-| Skill | What it teaches |
-|---|---|
-| [`skills/postemi-writing`](./skills/postemi-writing) | post ideas, hooks and headlines, opening lines, formatting, threads, each network's writing rules, a check before publishing |
-| [`skills/postemi-growth`](./skills/postemi-growth) | choosing networks and a first niche, a 30-day test, reading the numbers, cadence, 30 angles for one topic, repurposing, bios and profile links, a weekly review |
-| [`skills/postemi-templates`](./skills/postemi-templates) | the template and hook library of the Postemi composer, generated from the web app |
+| Skill | What it teaches | In the plugins |
+|---|---|---|
+| [`skills/postemi-writing`](./skills/postemi-writing) | post ideas, hooks and headlines, opening lines, formatting, threads, each network's writing rules, a check before publishing | in every main plugin |
+| [`skills/postemi-templates`](./skills/postemi-templates) | the template and hook library of the Postemi composer, generated from the web app | in every main plugin, with writing |
+| [`skills/postemi-growth`](./skills/postemi-growth) | choosing networks and a first niche, a 30-day test, reading the numbers, cadence, 30 angles for one topic, repurposing, bios and profile links, a weekly review | optional: its own plugin, [`plugins/postemi-growth`](./plugins/postemi-growth) |
+
+```bash
+claude plugin install postemi-growth@postemi-agent   # the optional growth plugin
+```
+
+With the CLI, writing and growth are both optional; see below.
 
 ## Development
 
 ```bash
 pnpm install
 pnpm build        # dist/index.js
-pnpm test         # type check, build, and scripts/check.mjs (manifests, skill copies, no other-brand text)
+pnpm test         # type check, build, unit tests (test/), scripts/check.mjs (manifests, skill copies, no other-brand text)
 node dist/index.js --help
 
 pnpm sync:templates ../postemi/src/lib/app/templates   # regenerate skills/postemi-templates/reference from the web app
-pnpm sync:skills                                       # copy the three shared skills into every plugin
+pnpm sync:skills                                       # copy writing and templates into the main plugins, growth into postemi-growth
 ```
 
 Release steps: [`PUBLISHING.md`](./PUBLISHING.md). Changes: [`CHANGELOG.md`](./CHANGELOG.md).

@@ -5,15 +5,18 @@ description: Write social media posts people stop for and read to the end, then 
 
 # Postemi writing: posts that get read
 
-This skill is about the words. Three other Postemi skills sit next to it:
+This skill is about the words. Other Postemi skills sit next to it:
 
 - `postemi` (the main skill): the tools or commands that preview, schedule and
   publish. Its rules win over anything here.
 - `postemi-templates`: ready post templates and hooks with [placeholders],
   the same ones the Postemi composer shows. Start there when the user wants a
   quick draft of a known type (a launch, a tip, a poll).
-- `postemi-growth`: the plan over weeks: a niche, a 30-day test, cadence per
-  network, reading the numbers, repurposing.
+- `postemi-growth` (optional, may not be installed): the plan over weeks: a
+  niche, a 30-day test, cadence per network, reading the numbers,
+  repurposing. If it is missing and the user wants a plan, tell them how to
+  add it (`postemi skills add growth`, or the `postemi-growth` plugin); ask
+  first, never install it yourself.
 
 Reference files in this skill:
 
@@ -97,7 +100,8 @@ Ask one question at a time, then offer three ideas, each with a hook:
 4. What do most people in your field believe that you disagree with?
 5. What happened this week that taught you something?
 
-For a whole month of ideas from one topic, use `postemi-growth` (30 angles).
+For a whole month of ideas from one topic, use `postemi-growth` (30 angles)
+if it is installed.
 
 ## 2. The hook
 
@@ -303,4 +307,4 @@ With the `postemi` CLI (coding agents with a terminal):
    `postemi posts:find-slot <id>` suggests the next free slot.
 
 After it goes out, the numbers tell you which hooks and angles work: see
-`postemi-growth`.
+`postemi-growth` (optional).

@@ -72,3 +72,13 @@ User: "I have a video on my laptop, post it to TikTok, Reels and Shorts at 9 tom
 5. `get_integration_schema` for each of the three; write a caption within each limit. YouTube also needs a title and a privacy choice: ask the user.
 6. `preview_post` with the three-channel payload; show the per-account result.
 7. On the user's yes: `create_post` with the same payload and a fresh `idempotencyKey`. Report where and when it is scheduled, in local time.
+
+## Writing and growth skills
+
+`postemi-writing` and `postemi-templates` come with this plugin: use them to
+write the post before you preview it. `postemi-growth` (niche, cadence, a
+30-day plan) is an optional, separate plugin. If the user asks for a content
+plan or how to grow and it is not installed, tell them they can add the
+`postemi-growth` plugin from the same marketplace (in Claude Code:
+`claude plugin install postemi-growth@postemi-agent`). Ask; never install
+anything yourself.

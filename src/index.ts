@@ -7,6 +7,7 @@ import { uploadFile, createUploadLink, listUploadLinkFiles } from './commands/up
 import { authLogin, authLogout, authStatus, authSignup } from './commands/auth';
 import { configSet, configGet } from './commands/config';
 import { listWorkspaces, useWorkspace, currentWorkspace } from './commands/workspaces';
+import { skillsList, skillsAdd, skillsRemove } from './commands/skills';
 import { billingPlans, billingSubscribe, billingStatus, billingManage } from './commands/billing';
 import type { Argv } from 'yargs';
 import { BRAND, envName, writeEnv } from './brand';
@@ -523,6 +524,40 @@ yargs(hideBin(process.argv))
     billingManage as any
   )
   .command(
+    'skills <command>',
+    `Optional agent skills: install them into Claude Code, Codex, Cursor or Grok Build`,
+    (yargs: Argv) => {
+      const target = (y: Argv) =>
+        y
+          .positional('skills', {
+            describe: 'writing (with templates), growth, all, or core',
+            type: 'string',
+            array: true,
+          })
+          .option('agent', {
+            describe: 'Only these agents: claude, codex, cursor, grok, or all (skips the question)',
+            type: 'string',
+            array: true,
+          })
+          .option('yes', { alias: 'y', describe: 'Ask nothing; use every agent found', type: 'boolean', default: false })
+          .option('json', { describe: 'Run as an agent or script: never ask', type: 'boolean', default: false });
+      return yargs
+        .command('list', 'Show the core and optional skills, and where each is installed', {}, skillsList as any)
+        .command(
+          'add [skills..]',
+          'Install skills (writing, growth, all); asks which when you name none',
+          (y: Argv) =>
+            target(y)
+              .example('$0 skills add writing', 'Writing and template skills, plus the core skill')
+              .example('$0 skills add all --agent claude --yes', 'Both optional skills, Claude Code only, no questions'),
+          skillsAdd as any
+        )
+        .command('remove [skills..]', 'Remove installed skills (writing, growth, all, core)', target, skillsRemove as any)
+        .demandCommand(1, `Use: ${BRAND.cli} skills list | add | remove`);
+    },
+    () => {}
+  )
+  .command(
     'config:set <key> <value>',
     `Save a CLI setting to ~/${BRAND.configDirName}/config.json`,
     (yargs: Argv) => {
@@ -564,6 +599,11 @@ yargs(hideBin(process.argv))
         .option('auth-server', {
           describe: `Auth server URL (default: ${BRAND.defaultApiUrl})`,
           type: 'string',
+        })
+        .option('json', {
+          describe: 'Run as an agent or script: ask no setup questions after the login',
+          type: 'boolean',
+          default: false,
         })
         .example(
           '$0 auth:login',

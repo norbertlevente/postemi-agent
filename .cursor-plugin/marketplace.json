@@ -12,6 +12,11 @@
       "name": "postemi",
       "source": "plugins/postemi-cursor",
       "description": "Write, schedule and publish social media posts to 25+ platforms through Postemi's MCP server, and announce releases from your changelog."
+    },
+    {
+      "name": "postemi-growth",
+      "source": "plugins/postemi-growth",
+      "description": "Optional Postemi skill: grow an audience on social media. Choosing networks and a first niche, a 30-day posting test, cadence per network, reading the numbers, 30 post angles for one topic, repurposing, bios and profile links, and a weekly review. Install it next to the Postemi plugin (MCP or CLI), which schedules the posts."
     }
   ]
 }

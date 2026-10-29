@@ -1,0 +1,30 @@
+{
+  "name": "postemi-growth",
+  "displayName": "Postemi Growth",
+  "version": "1.0.0",
+  "description": "Optional Postemi skill: grow an audience on social media. Choosing networks and a first niche, a 30-day posting test, cadence per network, reading the numbers, 30 post angles for one topic, repurposing, bios and profile links, and a weekly review. Install it next to the Postemi plugin (MCP or CLI), which schedules the posts.",
+  "author": {
+    "name": "Norbert Kiss",
+    "email": "norbert@postemi.com",
+    "url": "https://github.com/norbertlevente"
+  },
+  "homepage": "https://postemi.com",
+  "documentationUrl": "https://postemi.com/docs/mcp",
+  "supportUrl": "https://postemi.com/help",
+  "privacyPolicyUrl": "https://postemi.com/privacy",
+  "termsOfServiceUrl": "https://postemi.com/terms",
+  "repository": "https://github.com/norbertlevente/postemi-agent",
+  "license": "AGPL-3.0",
+  "keywords": [
+    "postemi",
+    "social-media",
+    "growth",
+    "content-plan",
+    "content-calendar",
+    "posting-cadence",
+    "audience",
+    "creator",
+    "skills"
+  ],
+  "icon": "./.claude-plugin/icon.png"
+}

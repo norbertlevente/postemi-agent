@@ -10,9 +10,11 @@ confirm.
 - **MCP server** `postemi` at `https://mcp.postemi.com/mcp`. Sign in with
   your browser on first use; no key to paste.
 - **Skill** `postemi`: the workflow and the rules for posting through Postemi.
-- **Skills** `postemi-writing`, `postemi-growth` and `postemi-templates`: how
-  to write posts that get read, how to grow an audience, and the Postemi
-  template and hook library.
+- **Skills** `postemi-writing` and `postemi-templates`: how to write posts
+  that get read, and the Postemi template and hook library.
+- Optional, as its own plugin: **postemi-growth** (how to grow an audience:
+  niche, cadence, content plan, numbers). Install it from the same
+  marketplace only if you want it.
 - **Commands**
   - `/announce-release`: posts about your latest release, from the changelog.
   - `/schedule-post`: one post, at the time you name.

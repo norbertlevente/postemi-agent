@@ -15,11 +15,13 @@ Do the steps in this order; each one says how to check it.
 | Cursor plugin `postemi` | `plugins/postemi-cursor`, listed in `.cursor-plugin/marketplace.json` | same |
 | Grok Build plugin `postemi` | `plugins/postemi-grok` | same |
 | Agent skill `postemi` (ClawHub, Hermes, skills.sh) | `skills/postemi/SKILL.md` | the `postemi` command |
-| Agent skills `postemi-writing`, `postemi-growth`, `postemi-templates` | `skills/<name>/`, copied into every plugin by `pnpm sync:skills` | the `postemi` skill or the MCP tools |
+| Agent skills `postemi-writing`, `postemi-templates` | `skills/<name>/`, copied into every main plugin by `pnpm sync:skills`; in the npm package for `postemi skills add writing` | the `postemi` skill or the MCP tools |
+| Optional plugin `postemi-growth` (Claude Code, Cursor, Grok) | `plugins/postemi-growth`, skill copied by `pnpm sync:skills`; in the npm package for `postemi skills add growth` | the `postemi` skill or the MCP tools |
 | Gemini CLI extension | separate repo `norbertlevente/postemi-gemini` | same MCP URL |
 
 The Claude marketplace in `.claude-plugin/marketplace.json` is named
-`postemi-agent` and lists `postemi` and `postemi-cli`.
+`postemi-agent` and lists `postemi`, `postemi-cli` and the optional
+`postemi-growth`. The Cursor marketplace lists `postemi` and `postemi-growth`.
 
 ## 0. Before anything: checks
 
@@ -51,6 +53,7 @@ Check:
 claude plugin marketplace add norbertlevente/postemi-agent
 claude plugin install postemi@postemi-agent
 claude plugin install postemi-cli@postemi-agent
+claude plugin install postemi-growth@postemi-agent
 ```
 
 ## 2. npm `postemi` 1.0.1 (owner, in Terminal.app: the 2FA is a passkey)
@@ -67,7 +70,8 @@ Check: `npm view postemi version` (1.0.1, a few minutes after),
 `npm i -g postemi && postemi --help && postemi auth:status`.
 The tarball holds `dist/index.js` (starts with `#!/usr/bin/env node`),
 `dist/index.js.map`, `README.md`, `SKILL.md`, `PROVIDER_SETTINGS.md`,
-`SUPPORTED_FILE_TYPES.md`, `examples/`, `LICENSE` and `package.json`.
+`SUPPORTED_FILE_TYPES.md`, `examples/`, `skills/` (core, writing, templates,
+growth, for `postemi skills add`), `LICENSE` and `package.json`.
 
 ## 3. Claude directory: the chat bundle (owner submits)
 
@@ -150,7 +154,52 @@ then `/mcp` shows `postemi` and the browser sign-in opens on postemi.com.
   `.cursor-plugin/marketplace.json` (`plugins/postemi-cursor`).
 - Grok Build: a pull request to `xai-org/plugin-marketplace` vendoring
   `plugins/postemi-grok` as `external_plugins/postemi`.
-  `grok plugin validate plugins/postemi-grok` must pass first.
+  `grok plugin validate plugins/postemi-grok` must pass first. The optional
+  growth plugin goes in the same pull request as `external_plugins/postemi-growth`
+  (`grok plugin validate plugins/postemi-growth`).
+- Cursor lists `postemi-growth` from the same `.cursor-plugin/marketplace.json`.
+
+## Optional skills, per format
+
+The core `postemi` skill is always on. `postemi-writing` (with
+`postemi-templates`) ships in every main plugin. `postemi-growth` is optional:
+
+| Format | How growth is optional |
+|---|---|
+| npm CLI | `postemi skills add growth` (and `writing`): asked once after `auth:login` on a terminal, never for an agent |
+| Claude Code | separate plugin `postemi-growth` in the `postemi-agent` marketplace |
+| Cursor | separate plugin `postemi-growth` in `.cursor-plugin/marketplace.json` |
+| Grok Build | separate plugin `postemi-growth`, vendored next to `postemi` |
+| Claude chat bundle (`postemi-mcp`) | not in the bundle; the directory takes one bundle, so growth comes as MCP prompts (below) |
+| ChatGPT app | not in the package; one app per listing, so growth comes as MCP prompts (below) |
+
+## MCP plan: writing and growth as prompts (server side, not built yet)
+
+MCP prompts are picked by the user (a slash command or a menu entry in the
+client), so they are optional by nature: nothing loads until the user asks.
+The hosted server at `https://mcp.postemi.com/mcp` lives in the platform
+repository, not here; this is the plan for it:
+
+- **Prompts**
+  - `write_post` (arguments: `topic`, optional `network`, `goal`): the
+    `postemi-writing` rules for that network plus the check before
+    publishing, ending in `preview_post`.
+  - `use_template` (arguments: `template` id or a goal like launch, tip,
+    poll; optional `network`): one template from `postemi-templates` with its
+    placeholders, to fill in with the user.
+  - `content_plan_30_days` (arguments: `topic`, `networks`, optional
+    `posts_per_week`): the `postemi-growth` 30-day test and the 30 angles,
+    ending in drafts the user previews and schedules.
+- **Resources** the client reads only when a prompt or the user asks for
+  them: `postemi://skills/writing`, `postemi://skills/writing/networks`,
+  `postemi://skills/templates` (the index) and
+  `postemi://skills/templates/<group>`, `postemi://skills/growth` and
+  `postemi://skills/growth/30-angles`. Text from `skills/` in this repository,
+  copied into the server at build time.
+- **Server instructions**: one line saying the three prompts exist and are
+  optional ("If the user wants help writing or planning, offer the
+  write_post, use_template or content_plan_30_days prompts"), so the model
+  offers them instead of loading them on every chat.
 
 ## Versions
 

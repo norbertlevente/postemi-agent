@@ -13,14 +13,16 @@
     "start": "node ./dist/index.js",
     "prepublishOnly": "pnpm run build",
     "release:check": "tsup && npm pack --dry-run && npm publish --dry-run",
-    "test": "tsc --noEmit -p . && tsup && node scripts/check.mjs",
+    "test": "tsc --noEmit -p . && tsup && node scripts/unit-tests.mjs && node scripts/check.mjs",
     "sync:templates": "node scripts/sync-templates.mjs",
-    "sync:skills": "node scripts/sync-skills.mjs"
+    "sync:skills": "node scripts/sync-skills.mjs",
+    "test:unit": "node scripts/unit-tests.mjs"
   },
   "files": [
     "dist",
     "README.md",
     "SKILL.md",
+    "skills",
     "PROVIDER_SETTINGS.md",
     "SUPPORTED_FILE_TYPES.md",
     "examples",

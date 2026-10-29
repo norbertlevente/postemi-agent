@@ -4,7 +4,7 @@
  * Deliberately separate from `credentials.json`: settings survive
  * `postemi auth:logout`, and the credentials file keeps holding secrets only.
  *
- * One known key today: `timezone` (an IANA name, used to interpret dates
+ * Known keys: `timezone` (an IANA name, used to interpret dates
  * written without an explicit offset — see dates.ts for the full ladder).
  */
 
@@ -44,6 +44,15 @@ export function getSetting(key: SettingKey): string | undefined {
 }
 
 export function saveSetting(key: SettingKey, value: string): void {
+  saveRawSetting(key, value);
+}
+
+/**
+ * Any key, for state the CLI keeps for itself (`skills.writing`,
+ * `skills.growth`, `skills.hint`: the answers to the optional skills
+ * question). Not settable with config:set.
+ */
+export function saveRawSetting(key: string, value: string): void {
   if (!existsSync(SETTINGS_DIR)) {
     mkdirSync(SETTINGS_DIR, { recursive: true, mode: 0o700 });
   }

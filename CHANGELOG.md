@@ -4,15 +4,25 @@ All notable changes to the Postemi CLI (npm `postemi`) are listed here.
 
 ## Unreleased
 
-- Three new agent skills, shipped in every plugin (CLI, MCP, ChatGPT, Cursor,
-  Grok): `postemi-writing` (ideas, hooks, openers, formatting, network rules,
-  a pre-publish check), `postemi-growth` (niche, 30-day test, numbers,
+- New command `postemi skills` (`list`, `add`, `remove`): installs the agent
+  skills into Claude Code, Codex, Cursor and Grok Build (the ones found on
+  the machine; `--agent` and `--yes` skip the questions). The core `postemi`
+  skill comes with any of them; `writing` (`postemi-writing` and
+  `postemi-templates`) and `growth` (`postemi-growth`) are optional. The npm
+  package now ships `skills/`.
+- After `postemi auth:login` on a terminal the CLI asks once whether to
+  install the writing and the growth skill (default No) and remembers the
+  answers in `~/.postemi/config.json`. Off a terminal (an agent, `--json`,
+  `CI`) it never asks and prints one hint, once. `auth:login` takes `--json`.
+- The skills: `postemi-writing` (ideas, hooks, openers, formatting, network
+  rules, a pre-publish check), `postemi-growth` (niche, 30-day test, numbers,
   cadence, 30 angles, repurposing, profile funnel, weekly review) and
   `postemi-templates` (the composer's templates and hooks, generated from the
-  web app by `scripts/sync-templates.mjs`).
-- `scripts/sync-skills.mjs` copies them into the plugins; `pnpm test` checks
-  the copies, their links and that they hold no em or en dashes.
-- No change to the CLI commands.
+  web app by `scripts/sync-templates.mjs`). Writing and templates ship in
+  every main plugin; growth is its own optional plugin, `postemi-growth`.
+- `scripts/sync-skills.mjs` copies them into the plugins; `pnpm test` runs
+  unit tests and checks the copies, their links and that they hold no em or
+  en dashes.
 
 ## 1.0.1
 
