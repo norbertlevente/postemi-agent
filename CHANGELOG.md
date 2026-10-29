@@ -2,7 +2,7 @@
 
 All notable changes to the Postemi CLI (npm `postemi`) are listed here.
 
-## Unreleased
+## 1.1.0 (2026-10-29)
 
 - New command `postemi skills` (`list`, `add`, `remove`): installs the agent
   skills into Claude Code, Codex, Cursor and Grok Build (the ones found on

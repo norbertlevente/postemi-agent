@@ -56,17 +56,17 @@ claude plugin install postemi-cli@postemi-agent
 claude plugin install postemi-growth@postemi-agent
 ```
 
-## 2. npm `postemi` 1.0.1 (owner, in Terminal.app: the 2FA is a passkey)
+## 2. npm `postemi` 1.1.0 (owner, in Terminal.app: the 2FA is a passkey)
 
-1.0.0 is already on npm. 1.0.1 changes only the package metadata (the
-repository moved to `postemi-agent`), so the command behaves the same.
+1.0.1 is on npm. 1.1.0 adds `postemi skills` (the optional writing and growth
+skills, asked once after login) and ships the skills in the package.
 
 ```bash
 pnpm run release:check               # builds, packs and dry-runs; publishes nothing
 npm publish --access public          # prepublishOnly rebuilds dist/
 ```
 
-Check: `npm view postemi version` (1.0.1, a few minutes after),
+Check: `npm view postemi version` (1.1.0, a few minutes after),
 `npm i -g postemi && postemi --help && postemi auth:status`.
 The tarball holds `dist/index.js` (starts with `#!/usr/bin/env node`),
 `dist/index.js.map`, `README.md`, `SKILL.md`, `PROVIDER_SETTINGS.md`,
@@ -125,7 +125,7 @@ app. After approval, publish by hand.
 From the repository root (the path must be a folder):
 
 ```bash
-clawhub skill publish ./skills/postemi --slug postemi --version 1.0.1
+clawhub skill publish ./skills/postemi --slug postemi --version 1.1.0
 ```
 
 Check: the scan is CLEAN, `hermes skills install clawhub/postemi` works.
