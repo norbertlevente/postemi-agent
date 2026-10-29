@@ -7,7 +7,7 @@ command-line tool. It uses the same public API as the web app: what you
 schedule here shows up in your Postemi calendar, and what you schedule there
 you can see here too.
 
-Channels: 25+ platforms, including Facebook, Instagram, X, LinkedIn, TikTok, YouTube, Threads, Bluesky, Pinterest and Mastodon.
+Channels: 37 platforms and apps, including Facebook, Instagram, X, LinkedIn, TikTok, YouTube, Threads, Bluesky, Pinterest and Mastodon.
 
 Plan: the CLI, the API and MCP need the Pro plan or higher (Pro, Creator or
 Team). Basic has no API access.

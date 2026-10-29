@@ -130,7 +130,7 @@ const packFiles = JSON.parse(
 )[0].files.map((f) => f.path);
 const gitFiles = execFileSync('git', ['ls-files'], { cwd: root, encoding: 'utf8' })
   .split('\n')
-  .filter((f) => f && f !== 'scripts/check.mjs' && !/\.(png|jpg)$/.test(f));
+  .filter((f) => f && f !== 'scripts/check.mjs' && !/\.(png|jpg|jpeg|gif|mp4|webp|svg)$/.test(f));
 for (const file of new Set([...packFiles, ...gitFiles])) {
   if (file.endsWith('.map')) continue; // same text as dist/index.js
   let text = readFileSync(join(root, file), 'utf8');
