@@ -1,7 +1,7 @@
 # Postemi for Cursor and Grok Bot
 
 Write, schedule and publish social media posts without leaving the editor:
-25+ platforms, including Facebook, Instagram, X, LinkedIn, TikTok, YouTube, Threads, Bluesky, Pinterest and Mastodon. Postemi previews every post per account (name,
+37 platforms and apps, including Facebook, Instagram, X, LinkedIn, TikTok, YouTube, Threads, Bluesky, Pinterest and Mastodon. Postemi previews every post per account (name,
 @handle, local publish time, character count) and creates it only after you
 confirm.
 

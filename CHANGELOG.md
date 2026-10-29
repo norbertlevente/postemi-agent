@@ -2,6 +2,15 @@
 
 All notable changes to the Postemi CLI (npm `postemi`) are listed here.
 
+## 1.1.1 (2026-10-29)
+
+- The `postemi` skill and the package description list all 37 platforms and
+  apps Postemi offers, Pinterest live and the newer channels (Hashnode,
+  Lemmy, Nostr, Webflow, Shopify, newsletters and more) in beta. The old text
+  said 25+ and called Pinterest coming soon.
+- The ChatGPT skills call `open_postemi` and read `postemi://` links, the
+  Postemi MCP server's names since today.
+
 ## 1.1.0 (2026-10-29)
 
 - New command `postemi skills` (`list`, `add`, `remove`): installs the agent

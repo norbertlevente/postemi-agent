@@ -2,10 +2,12 @@
 
 Every channel Postemi supports, and every field its `--settings` payload accepts.
 
-**The channels below are the whole list.** Postemi's server carries inherited
-code for many other providers: Reddit, Medium, Hashnode, Lemmy, Nostr, VK,
-Dribbble, Farcaster and others. None of them are enabled or supported. Do not
-build a settings payload for one.
+**Postemi offers 37 platforms and apps** (the table in SKILL.md). The channels
+below have their settings written out. For any other offered channel (the newer
+BETA ones such as Hashnode, Lemmy, Nostr or the newsletters), read its fields
+with `integrations:settings <id>` before you build a payload. Postemi's server
+also carries inherited code for providers it does not offer (Reddit, Medium,
+VK, Farcaster and others): never build a settings payload for one.
 
 | Channel | `__type` | Has settings? | Status |
 |---|---|---|---|

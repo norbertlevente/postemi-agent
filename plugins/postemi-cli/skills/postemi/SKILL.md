@@ -1,6 +1,6 @@
 ---
 name: postemi
-description: Postemi schedules and publishes social posts from the command line to 25+ platforms, including Facebook, Instagram, X, LinkedIn, TikTok, YouTube, Threads, Bluesky, Pinterest and Mastodon.
+description: Postemi schedules and publishes social posts from the command line to 37 platforms and apps, including Facebook, Instagram, X, LinkedIn, TikTok, YouTube, Threads, Bluesky, Pinterest and Mastodon.
 homepage: https://postemi.com
 metadata: {"openclaw":{"emoji":"🌎","requires":{"bins":[],"env":[]}}}
 ---
@@ -47,43 +47,59 @@ enabled and not supported. Postemi adds channels over time, so
 | YouTube | `youtube` | Live |
 | Threads | `threads` | Live |
 | Bluesky | `bluesky` | Live |
+| Pinterest | `pinterest` | Live (a pin needs a `board` id) |
 | Telegram | `telegram` | Live |
 | Discord | `discord` | Live |
 | Slack | `slack` | Live |
-| Pinterest | `pinterest` | Coming soon, not schedulable yet |
 | Mastodon (mastodon.social) | `mastodon` | BETA |
 | Mastodon (any other server) | `mastodon-custom` | BETA |
 | Pixelfed (any server) | `pixelfed` | BETA |
-| WordPress (your own site) | `wordpress` | BETA |
 | Tumblr | `tumblr` | BETA |
-| Dev.to | `devto` | BETA |
+| WordPress (your own site) | `wordpress` | BETA |
 | Ghost (your own site) | `ghost` | BETA |
+| Dev.to | `devto` | BETA |
+| Hashnode | `hashnode` | BETA |
+| Webflow (CMS collection) | `webflow` | BETA |
+| Shopify (blog) | `shopify` | BETA |
 | Google Chat (a space, by webhook) | `google-chat` | BETA |
 | Microsoft Teams (a channel, by webhook) | `microsoft-teams` | BETA |
+| Lemmy (a community) | `lemmy` | BETA |
+| Nostr | `nostr` | BETA |
+| Dribbble | `dribbble` | BETA |
+| Twitch (chat) | `twitch` | BETA |
+| Kick (chat) | `kick` | BETA |
+| Whop (forum) | `whop` | BETA |
+| Circle (community) | `circle` | BETA |
+| listmonk (newsletter) | `listmonk` | BETA |
+| MailerLite (newsletter) | `mailerlite` | BETA |
+| MailCheap (newsletter) | `mailcheap` | BETA |
+| Mailchimp (newsletter) | `mailchimp` | BETA |
+| Kit (newsletter) | `kit` | BETA |
+| Brevo (newsletter) | `brevo` | BETA |
+| Buttondown (newsletter) | `buttondown` | BETA |
 | Google Business Profile | `gmb` | Coming soon, not schedulable yet |
 | LinkedIn Pages (company pages) | `linkedin-page` | Coming soon, not schedulable yet |
+| Snapchat | `snapchat` | Coming soon, not schedulable yet |
 
-**Pinterest is coming soon.** Postemi customers cannot connect it until Pinterest
-approves Postemi's app, so it never appears in `integrations:list`. Tell the user
-it is not available yet. (When it opens, a pin needs a `board` id in
-`--settings`; see PROVIDER_SETTINGS.md.)
+**Pinterest is live.** A pin needs a `board` id in `--settings`; look it up first
+(see PROVIDER_SETTINGS.md).
 
-**The other BETA channels** connect and publish, but Postemi has not tried them
-with many real accounts yet. Say so when the user picks one. Most need
-settings (a title for WordPress, Dev.to and Ghost; a picture for Pixelfed);
-see PROVIDER_SETTINGS.md.
+**The BETA channels** connect and publish, but Postemi has not tried them with
+many real accounts yet. Say so when the user picks one. Many need settings (a
+title for WordPress, Dev.to, Ghost and Hashnode; a picture for Pixelfed; a
+community for Lemmy; a list or audience for the newsletters); check
+`integrations:settings` and PROVIDER_SETTINGS.md.
 
-**Google Business Profile and LinkedIn Pages are coming soon.** Those platforms
-have not approved Postemi yet, so the user cannot connect them. Do not schedule
-for them; personal LinkedIn profiles (`linkedin`) work today.
+**Google Business Profile, LinkedIn Pages and Snapchat are coming soon.** Those
+platforms have not approved Postemi yet, so the user cannot connect them. Do not
+schedule for them; personal LinkedIn profiles (`linkedin`) work today.
 
 **`integrations:list` is the truth.** The table says what Postemi supports; that
 command says what THIS user has actually connected. Check it before you
 schedule anything, and never post to an id that is not in its output.
 
 **Never assume another provider exists.** If a user asks for Reddit, Medium,
-Farcaster, Hashnode, Lemmy, Nostr, VK, a newsletter service or anything else
-that is not in the table, the answer is that Postemi does not offer it today.
+Farcaster, VK or anything else that is not in the table, the answer is that Postemi does not offer it today.
 Do not build a `--settings` payload for it.
 
 ---

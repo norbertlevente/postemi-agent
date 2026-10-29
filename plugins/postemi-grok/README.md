@@ -1,7 +1,7 @@
 # Postemi plugin for Grok Build
 
 Connect Grok Build to [Postemi](https://postemi.com), a social media scheduler:
-write, preview, schedule and publish posts to 25+ platforms, including Facebook, Instagram, X, LinkedIn, TikTok, YouTube, Threads, Bluesky, Pinterest and Mastodon, and
+write, preview, schedule and publish posts to 37 platforms and apps, including Facebook, Instagram, X, LinkedIn, TikTok, YouTube, Threads, Bluesky, Pinterest and Mastodon, and
 manage the content calendar.
 
 ## Installation

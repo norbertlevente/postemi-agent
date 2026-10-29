@@ -11,7 +11,7 @@
     {
       "name": "postemi",
       "source": "plugins/postemi-cursor",
-      "description": "Write, schedule and publish social media posts to 25+ platforms through Postemi's MCP server, and announce releases from your changelog."
+      "description": "Write, schedule and publish social media posts to 37 platforms and apps through Postemi's MCP server, and announce releases from your changelog."
     },
     {
       "name": "postemi-growth",
