@@ -75,10 +75,9 @@ User: "I have a video on my laptop, post it to TikTok, Reels and Shorts at 9 tom
 
 ## Writing and growth skills
 
-`postemi-writing` and `postemi-templates` come with this plugin: use them to
-write the post before you preview it. `postemi-growth` (niche, cadence, a
-30-day plan) is an optional, separate plugin. If the user asks for a content
-plan or how to grow and it is not installed, tell them they can add the
-`postemi-growth` plugin from the same marketplace (in Claude Code:
-`claude plugin install postemi-growth@postemi-agent`). Ask; never install
-anything yourself.
+This plugin holds the main skill only. The writing skill (`postemi-writing`
+with `postemi-templates`: ideas, hooks, templates) and the growth skill
+(`postemi-growth`: niche, cadence, a 30-day plan) are optional. If the user
+wants help writing or growing and they are not installed, tell them how to add
+them (in Claude Code: `claude plugin install postemi-growth@postemi-agent`, and
+the `postemi-cli` plugin for writing). Ask; never install anything yourself.

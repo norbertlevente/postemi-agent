@@ -162,7 +162,7 @@ then `/mcp` shows `postemi` and the browser sign-in opens on postemi.com.
 ## Optional skills, per format
 
 The core `postemi` skill is always on. `postemi-writing` (with
-`postemi-templates`) ships in every main plugin. `postemi-growth` is optional:
+`postemi-templates`) ships in the plugins people install in an agent (CLI, Cursor, Grok). The one-package listings (the Claude chat bundle and the ChatGPT app) ship the main `postemi` skill only. `postemi-growth` is optional:
 
 | Format | How growth is optional |
 |---|---|
@@ -170,8 +170,8 @@ The core `postemi` skill is always on. `postemi-writing` (with
 | Claude Code | separate plugin `postemi-growth` in the `postemi-agent` marketplace |
 | Cursor | separate plugin `postemi-growth` in `.cursor-plugin/marketplace.json` |
 | Grok Build | separate plugin `postemi-growth`, vendored next to `postemi` |
-| Claude chat bundle (`postemi-mcp`) | not in the bundle; the directory takes one bundle, so growth comes as MCP prompts (below) |
-| ChatGPT app | not in the package; one app per listing, so growth comes as MCP prompts (below) |
+| Claude chat bundle (`postemi-mcp`) | main skill only (no writing, no growth); the directory takes one bundle, so writing and growth come as MCP prompts (below) |
+| ChatGPT app | main skill only (no writing, no growth); one app per listing, so writing and growth come as MCP prompts (below) |
 
 ## MCP plan: writing and growth as prompts (server side, not built yet)
 

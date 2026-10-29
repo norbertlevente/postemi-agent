@@ -4,8 +4,12 @@
   each plugin folder is complete on its own (the plugin directories and the
   ChatGPT ZIP take a folder, not a link):
 
-    main plugins (postemi-cli, postemi-mcp, postemi-chatgpt, postemi-cursor,
+    plugins people install in an agent (postemi-cli, postemi-cursor,
     postemi-grok):  skills/postemi-writing, skills/postemi-templates
+    one-package listings (postemi-mcp = the Claude chat bundle,
+    postemi-chatgpt = the ChatGPT app):  none; they ship the main postemi
+    skill only (owner, 2026-10-29: when there is room for one, it is the
+    main skill)
     optional plugin postemi-growth:  skills/postemi-growth
 
   postemi-growth is NOT in the main plugins: it is its own plugin in the
@@ -25,8 +29,10 @@ export const SHARED_SKILLS = ['postemi-writing', 'postemi-growth', 'postemi-temp
 export const MAIN_PLUGINS = ['postemi-cli', 'postemi-mcp', 'postemi-chatgpt', 'postemi-cursor', 'postemi-grok'];
 
 /** Which shared skills each plugin ships. */
+/** The one-package listings (Claude chat bundle, ChatGPT app): the main skill only. */
+export const MAIN_SKILL_ONLY = ['postemi-mcp', 'postemi-chatgpt'];
 export const PLUGIN_SKILLS = {
-  ...Object.fromEntries(MAIN_PLUGINS.map((p) => [p, ['postemi-writing', 'postemi-templates']])),
+  ...Object.fromEntries(MAIN_PLUGINS.map((p) => [p, MAIN_SKILL_ONLY.includes(p) ? [] : ['postemi-writing', 'postemi-templates']])),
   'postemi-growth': ['postemi-growth'],
 };
 
