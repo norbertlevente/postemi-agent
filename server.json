@@ -1,0 +1,38 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "com.postemi/postemi",
+  "title": "Postemi: Social Media Scheduler",
+  "description": "Write, preview and schedule social media posts to 37 platforms and apps, from Instagram to Bluesky.",
+  "version": "1.0.0",
+  "websiteUrl": "https://postemi.com/docs/mcp",
+  "repository": {
+    "url": "https://github.com/norbertlevente/postemi-agent",
+    "source": "github"
+  },
+  "icons": [
+    {
+      "src": "https://postemi.com/brand/postemi-mark-black.png",
+      "mimeType": "image/png",
+      "sizes": ["1024x1024"],
+      "theme": "light"
+    },
+    {
+      "src": "https://postemi.com/brand/postemi-mark-white.png",
+      "mimeType": "image/png",
+      "sizes": ["1024x1024"],
+      "theme": "dark"
+    },
+    {
+      "src": "https://postemi.com/brand/postemi-mark-black.svg",
+      "mimeType": "image/svg+xml",
+      "sizes": ["any"],
+      "theme": "light"
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.postemi.com/mcp"
+    }
+  ]
+}
