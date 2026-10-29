@@ -35,16 +35,16 @@ checks it, shows it and publishes it. The Postemi tools do all the work.
 
 ## The Postemi app
 
-- `open_posty` opens the app: Calendar, New post and Channels. Call it when
+- `open_postemi` opens the app: Calendar, New post and Channels. Call it when
   the user asks to open Postemi or to see the calendar. To answer a question in
   words, use `list_posts`.
-- To let the user finish a post by hand, call `open_posty` with
+- To let the user finish a post by hand, call `open_postemi` with
   `{"view":"compose","draft":{"text":"...","channelIds":["..."],"publishAtUtc":"..."}}`.
   Nothing is saved until the user presses the button in the app.
 - A post the user selects in the app is in your context with its `postId`.
   To change it, write the new version, preview it, create it after the user
   confirms, and then delete the old one with `delete_post`.
-- A `posty://channel/<id>` or `posty://post/<id>` link in a message comes from
+- A `postemi://channel/<id>` or `postemi://post/<id>` link in a message comes from
   the @ menu. The id is the `integrationId` or the `postId` the tools take.
 
 ## Rules

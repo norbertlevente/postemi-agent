@@ -71,5 +71,8 @@ fine) and put the link there before the final upload.
 - Links: https://postemi.com, /help, /privacy, /terms
 - Brand colour #0A0A0A (dark mode #FFFFFF); logo `assets/logo.png` (512 x 512,
   black mark on white), composer icon `assets/logo.svg` (black mark).
-- The tool `open_posty` and the `posty://` @-menu links keep these names:
-  they are the MCP server's own names, and the skills call them as written.
+- The MCP server at mcp.postemi.com lists `open_postemi` and
+  `open_postemi_panel`, the widgets `ui://postemi/*` and the @-menu links
+  `postemi://`; the skills call them as written. (The old tool names still
+  run there as hidden aliases, but are never listed.) Submit only after
+  the backend with these names is deployed.

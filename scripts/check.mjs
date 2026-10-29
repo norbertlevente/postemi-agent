@@ -120,11 +120,11 @@ for (const manifest of ['.claude-plugin/plugin.json', '.cursor-plugin/plugin.jso
 // 3. Brand leaks
 const LEAK = /posty|POSTY_|budapest|forint|hungar|magyar|\.hu\b|fotoai|kreator|[áéíóöőúüű]/gi;
 /*
-  Allowed: `open_posty` and `posty://` are the MCP server's own tool and link
-  names (the ChatGPT skills must call them by name); `psty_` is the API key
-  prefix; the Postiz attribution in LICENSE.
+  Nothing is allowed: since 2026-10-29 the Postemi MCP server names its tools
+  `open_postemi*` and its links `postemi://`, so a skill that still says
+  `open_posty` or `posty://` is a leak too.
 */
-const ALLOWED = [/open_posty/g, /posty:\/\//g];
+const ALLOWED = [];
 const packFiles = JSON.parse(
   execFileSync('npm', ['pack', '--dry-run', '--json', '--ignore-scripts'], { cwd: root, encoding: 'utf8' })
 )[0].files.map((f) => f.path);

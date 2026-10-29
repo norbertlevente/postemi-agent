@@ -23,7 +23,7 @@ time and let the user skip any step.
    user must fix it in Postemi (postemi.com, Channels). If there are no channels,
    tell the user to connect one in Postemi first; ChatGPT cannot connect a
    social account.
-5. Call `open_posty` with `{}` to open the Postemi app, and explain the three
+5. Call `open_postemi` with `{}` to open the Postemi app, and explain the three
    tabs in one sentence each: Calendar, New post, Channels. Mention that
    Postemi is also in the ChatGPT sidebar.
 6. Offer a first task, for example: "Tell me what you want to post and when,
