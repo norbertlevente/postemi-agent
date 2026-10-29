@@ -6,6 +6,11 @@ Instagram, X, LinkedIn, TikTok, YouTube, Threads, Bluesky, Pinterest and
 Mastodon, with a content calendar and photo and video uploads in full
 quality. Browser sign-in, no key.
 
+Also included: the skills `postemi-writing` (how to write posts that get
+read), `postemi-growth` (how to grow an audience: niche, cadence, content
+plan, numbers) and `postemi-templates` (the Postemi template and hook
+library).
+
 ## Install
 
 ```sh

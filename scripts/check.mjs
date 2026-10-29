@@ -6,7 +6,10 @@
     2. The copies of the CLI skill are identical (SKILL.md, the one the npm
        package ships; skills/postemi/SKILL.md, the one ClawHub and skills.sh
        read; plugins/postemi-cli/skills/postemi/SKILL.md, the Claude Code
-       plugin's).
+       plugin's). The shared skills (postemi-writing, postemi-growth,
+       postemi-templates) are identical in every plugin that ships skills
+       (scripts/sync-skills.mjs copies them), every relative link in them
+       resolves, and they hold no em or en dashes.
     3. No file names the other brand or its region: the npm package files
        (from `npm pack --dry-run`, so dist/ too) and every file in git, except
        this one and the server's tool names the ChatGPT skills must use.
@@ -16,6 +19,7 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { SHARED_SKILLS, SKILL_PLUGINS } from './sync-skills.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const failures = [];
@@ -47,6 +51,36 @@ const skill = readFileSync(join(root, 'skills/postemi/SKILL.md'), 'utf8');
 for (const copy of ['SKILL.md', 'plugins/postemi-cli/skills/postemi/SKILL.md']) {
   if (readFileSync(join(root, copy), 'utf8') !== skill) {
     fail(`${copy} differs from skills/postemi/SKILL.md (copy it over)`);
+  }
+}
+
+for (const name of SHARED_SKILLS) {
+  const dir = join(root, 'skills', name);
+  const files = walk(dir).map((f) => relative(dir, f)).sort();
+  for (const file of files.filter((f) => f.endsWith('.md'))) {
+    const text = readFileSync(join(dir, file), 'utf8');
+    if (/[\u2013\u2014]/.test(text)) fail(`skills/${name}/${file}: em or en dash`);
+    for (const [, target] of text.matchAll(/\]\((\.{1,2}\/[^)#\s]*)/g)) {
+      try {
+        statSync(join(dir, dirname(file), target));
+      } catch {
+        fail(`skills/${name}/${file}: broken link ${target}`);
+      }
+    }
+  }
+  for (const plugin of SKILL_PLUGINS) {
+    const copyDir = join(root, 'plugins', plugin, 'skills', name);
+    let copyFiles = [];
+    try {
+      copyFiles = walk(copyDir).map((f) => relative(copyDir, f)).sort();
+    } catch {
+      fail(`plugins/${plugin}/skills/${name} is missing (run pnpm sync:skills)`);
+      continue;
+    }
+    const same =
+      copyFiles.length === files.length &&
+      files.every((f, i) => copyFiles[i] === f && readFileSync(join(dir, f), 'utf8') === readFileSync(join(copyDir, f), 'utf8'));
+    if (!same) fail(`plugins/${plugin}/skills/${name} differs from skills/${name} (run pnpm sync:skills)`);
   }
 }
 

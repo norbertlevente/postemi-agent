@@ -15,6 +15,7 @@ Do the steps in this order; each one says how to check it.
 | Cursor plugin `postemi` | `plugins/postemi-cursor`, listed in `.cursor-plugin/marketplace.json` | same |
 | Grok Build plugin `postemi` | `plugins/postemi-grok` | same |
 | Agent skill `postemi` (ClawHub, Hermes, skills.sh) | `skills/postemi/SKILL.md` | the `postemi` command |
+| Agent skills `postemi-writing`, `postemi-growth`, `postemi-templates` | `skills/<name>/`, copied into every plugin by `pnpm sync:skills` | the `postemi` skill or the MCP tools |
 | Gemini CLI extension | separate repo `norbertlevente/postemi-gemini` | same MCP URL |
 
 The Claude marketplace in `.claude-plugin/marketplace.json` is named

@@ -15,6 +15,9 @@ for the workspace you want Grok to use. Do not paste an API key into the chat.
 - MCP server `postemi` (streamable HTTP).
 - Skill `postemi`: the posting workflow and its rules (preview before create,
   times in the user's timezone, per-account character limits).
+- Skills `postemi-writing`, `postemi-growth` and `postemi-templates`: how to
+  write posts that get read, how to grow an audience, and the Postemi
+  template and hook library.
 - Commands `/announce-release` (posts about the latest release, from the
   changelog) and `/schedule-post`.
 

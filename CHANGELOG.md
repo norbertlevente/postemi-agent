@@ -2,6 +2,18 @@
 
 All notable changes to the Postemi CLI (npm `postemi`) are listed here.
 
+## Unreleased
+
+- Three new agent skills, shipped in every plugin (CLI, MCP, ChatGPT, Cursor,
+  Grok): `postemi-writing` (ideas, hooks, openers, formatting, network rules,
+  a pre-publish check), `postemi-growth` (niche, 30-day test, numbers,
+  cadence, 30 angles, repurposing, profile funnel, weekly review) and
+  `postemi-templates` (the composer's templates and hooks, generated from the
+  web app by `scripts/sync-templates.mjs`).
+- `scripts/sync-skills.mjs` copies them into the plugins; `pnpm test` checks
+  the copies, their links and that they hold no em or en dashes.
+- No change to the CLI commands.
+
 ## 1.0.1
 
 - The source moved to its own repository,

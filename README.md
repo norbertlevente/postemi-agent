@@ -116,6 +116,17 @@ claude plugin install postemi-cli@postemi-agent    # CLI skill
 The skill on its own (for OpenClaw and other agents) is
 [`skills/postemi/SKILL.md`](./skills/postemi/SKILL.md).
 
+### Writing and growth skills
+
+Three more skills help the agent write the posts, not only schedule them.
+Every plugin above ships them:
+
+| Skill | What it teaches |
+|---|---|
+| [`skills/postemi-writing`](./skills/postemi-writing) | post ideas, hooks and headlines, opening lines, formatting, threads, each network's writing rules, a check before publishing |
+| [`skills/postemi-growth`](./skills/postemi-growth) | choosing networks and a first niche, a 30-day test, reading the numbers, cadence, 30 angles for one topic, repurposing, bios and profile links, a weekly review |
+| [`skills/postemi-templates`](./skills/postemi-templates) | the template and hook library of the Postemi composer, generated from the web app |
+
 ## Development
 
 ```bash
@@ -123,6 +134,9 @@ pnpm install
 pnpm build        # dist/index.js
 pnpm test         # type check, build, and scripts/check.mjs (manifests, skill copies, no other-brand text)
 node dist/index.js --help
+
+pnpm sync:templates ../postemi/src/lib/app/templates   # regenerate skills/postemi-templates/reference from the web app
+pnpm sync:skills                                       # copy the three shared skills into every plugin
 ```
 
 Release steps: [`PUBLISHING.md`](./PUBLISHING.md). Changes: [`CHANGELOG.md`](./CHANGELOG.md).
