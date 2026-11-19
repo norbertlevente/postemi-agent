@@ -1,7 +1,7 @@
 {
   "name": "postemi",
   "displayName": "Postemi: AI Social Media Scheduler",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Social media scheduler for Claude: write, schedule and publish posts to 37 platforms and apps, including Facebook, Instagram, X, LinkedIn, TikTok, YouTube, Threads, Bluesky, Pinterest and Mastodon, with a content calendar and photo and video uploads in full quality. Browser sign-in, no key.",
   "author": {
     "name": "Postemi",
@@ -39,5 +39,5 @@
     "reels"
   ],
   "mcpServers": "./.mcp.json",
-  "icon": "./.claude-plugin/icon.png"
+  "icon": "https://raw.githubusercontent.com/norbertlevente/postemi-agent/main/plugins/postemi-mcp/.claude-plugin/icon.png"
 }
