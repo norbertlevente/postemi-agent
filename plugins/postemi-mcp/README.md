@@ -6,8 +6,7 @@ Instagram, X, LinkedIn, TikTok, YouTube, Threads, Bluesky, Pinterest and
 Mastodon, with a content calendar and photo and video uploads in full
 quality. Browser sign-in, no key.
 
-This plugin ships the main `postemi` skill only (the Claude chat directory
-takes one bundle, so it holds the main skill). The writing skill
+This plugin ships the main `postemi` skill. The writing skill
 (`postemi-writing` with `postemi-templates`) and the growth skill
 (`postemi-growth`) are optional: in Claude Code install the `postemi-cli`
 plugin for writing and `claude plugin install postemi-growth@postemi-agent`
@@ -44,5 +43,3 @@ stores posts and media in your workspace until you delete them.
 - Support: norbert@postemi.com
 
 Made by Kiss Industries (Basel, Switzerland), the company behind Postemi.
-
-Publishing steps for the owner: [`PUBLISHING.md`](../../PUBLISHING.md).
