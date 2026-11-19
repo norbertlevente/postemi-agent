@@ -3,15 +3,18 @@
   Repository checks, run by `pnpm test` after the type check and the build.
 
     1. Every JSON manifest parses.
-    2. The copies of the CLI skill are identical (SKILL.md, the one the npm
-       package ships; skills/postemi/SKILL.md, the one ClawHub and skills.sh
-       read; plugins/postemi-cli/skills/postemi/SKILL.md, the Claude Code
-       plugin's). The shared skills (postemi-writing, postemi-growth,
+    2. The copies of the CLI skill are identical (skills/postemi, the one
+       ClawHub and skills.sh read; SKILL.md and reference/ at the root, the
+       ones the npm package ships; plugins/postemi-cli/skills/postemi, the
+       Claude Code plugin's). The shared skills (postemi-writing, postemi-growth,
        postemi-templates) are identical in every plugin that ships them
        (scripts/sync-skills.mjs: writing and templates in the main plugins,
        growth only in the optional postemi-growth plugin), no plugin has a
        shared skill it should not have, every relative link in them
        resolves, and they hold no em or en dashes.
+    2a. Every skill file (skills/, plugins/<plugin>/skills/, the root SKILL.md
+       and reference/): no em or en dash and no hyphen used as a dash in
+       prose (code is skipped), and every relative link resolves.
     2b. The optional postemi-growth plugin is listed in the Claude Code and
        Cursor marketplaces, and its manifests parse.
     3. No file names the other brand or its region: the npm package files
@@ -23,7 +26,7 @@ import { execFileSync } from 'node:child_process';
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { PLUGIN_SKILLS, SHARED_SKILLS } from './sync-skills.mjs';
+import { CLI_SKILL_COPIES, PLUGIN_SKILLS, SHARED_SKILLS, skillFiles } from './sync-skills.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const failures = [];
@@ -51,11 +54,66 @@ for (const file of jsonFiles) {
 }
 
 // 2. Skill copies
-const skill = readFileSync(join(root, 'skills/postemi/SKILL.md'), 'utf8');
-for (const copy of ['SKILL.md', 'plugins/postemi-cli/skills/postemi/SKILL.md']) {
-  if (readFileSync(join(root, copy), 'utf8') !== skill) {
-    fail(`${copy} differs from skills/postemi/SKILL.md (copy it over)`);
+const cliSkill = join(root, 'skills/postemi');
+const cliFiles = skillFiles(cliSkill);
+for (const to of CLI_SKILL_COPIES) {
+  const dest = join(root, to);
+  const where = to === '.' ? 'the repository root' : to;
+  let have = [];
+  try {
+    have = skillFiles(dest);
+  } catch {
+    // missing; reported below
   }
+  if (have.join('\n') !== cliFiles.join('\n')) {
+    fail(`${where}: the CLI skill's files differ from skills/postemi (run pnpm sync:skills)`);
+    continue;
+  }
+  for (const file of cliFiles) {
+    if (readFileSync(join(cliSkill, file), 'utf8') !== readFileSync(join(dest, file), 'utf8')) {
+      fail(`${where}/${file} differs from skills/postemi/${file} (run pnpm sync:skills)`);
+    }
+  }
+}
+
+// 2a. Dashes and links in every skill file
+const skillDocs = new Set([join(root, 'SKILL.md')]);
+for (const dir of [join(root, 'reference'), join(root, 'skills')]) {
+  try {
+    walk(dir).forEach((f) => skillDocs.add(f));
+  } catch {
+    // absent
+  }
+}
+for (const plugin of readdirSync(join(root, 'plugins'))) {
+  try {
+    walk(join(root, 'plugins', plugin, 'skills')).forEach((f) => skillDocs.add(f));
+  } catch {
+    // a plugin without skills
+  }
+}
+for (const file of [...skillDocs].filter((f) => f.endsWith('.md')).sort()) {
+  const name = relative(root, file);
+  let inFence = false;
+  readFileSync(file, 'utf8')
+    .split('\n')
+    .forEach((line, i) => {
+      if (/^\s*(```|~~~)/.test(line)) {
+        inFence = !inFence;
+        return;
+      }
+      if (inFence) return;
+      const prose = line.replace(/`[^`]*`/g, '``');
+      if (/[\u2013\u2014]/.test(prose)) fail(`${name}:${i + 1}: em or en dash`);
+      if (/\S\s+-{1,2}\s+\S/.test(prose.replace(/^\s*[-*]\s+/, ''))) fail(`${name}:${i + 1}: hyphen used as a dash`);
+      for (const [, target] of line.matchAll(/\]\((\.{1,2}\/[^)#\s]*)/g)) {
+        try {
+          statSync(join(dirname(file), target));
+        } catch {
+          fail(`${name}:${i + 1}: broken link ${target}`);
+        }
+      }
+    });
 }
 
 for (const name of SHARED_SKILLS) {

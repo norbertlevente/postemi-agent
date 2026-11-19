@@ -16,12 +16,17 @@
   Claude Code, Cursor and Grok marketplaces, so a person installs it only
   when they want it. A shared skill a plugin should not have is deleted.
 
+  The CLI skill, skills/postemi (SKILL.md and reference/), is copied too:
+  to the repository root (the npm package ships SKILL.md and reference/) and
+  to plugins/postemi-cli/skills/postemi (the Claude Code CLI plugin). The
+  other main plugins (MCP, ChatGPT, Cursor, Grok) have their own `postemi`
+  skill, written for the MCP tools, which is not copied.
+
   `pnpm test` (scripts/check.mjs) fails when a copy differs or a skill is
-  where it should not be. Run this after editing any shared skill, or after
-  scripts/sync-templates.mjs. The `postemi` skill itself is not copied: each
-  main plugin has its own version (CLI, MCP, ChatGPT, Cursor, Grok).
+  where it should not be. Run this after editing any skill under skills/, or
+  after scripts/sync-templates.mjs.
 */
-import { cpSync, existsSync, rmSync } from 'node:fs';
+import { cpSync, existsSync, readdirSync, rmSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -35,6 +40,23 @@ export const PLUGIN_SKILLS = {
   ...Object.fromEntries(MAIN_PLUGINS.map((p) => [p, MAIN_SKILL_ONLY.includes(p) ? [] : ['postemi-writing', 'postemi-templates']])),
   'postemi-growth': ['postemi-growth'],
 };
+
+/** The CLI skill's copies: [destination relative to the repository root]. */
+export const CLI_SKILL_COPIES = ['.', 'plugins/postemi-cli/skills/postemi'];
+
+/** The files of a skill folder: SKILL.md plus everything under reference/. */
+export function skillFiles(dir) {
+  const files = ['SKILL.md'];
+  const walk = (d, prefix) => {
+    for (const name of readdirSync(d)) {
+      const path = join(d, name);
+      if (statSync(path).isDirectory()) walk(path, join(prefix, name));
+      else files.push(join(prefix, name));
+    }
+  };
+  if (existsSync(join(dir, 'reference'))) walk(join(dir, 'reference'), 'reference');
+  return files.sort();
+}
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -54,5 +76,13 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
       copies++;
     }
   }
-  console.log(`sync-skills: ${copies} skill copies in ${Object.keys(PLUGIN_SKILLS).length} plugins`);
+  const cli = join(root, 'skills', 'postemi');
+  for (const to of CLI_SKILL_COPIES) {
+    const dest = join(root, to);
+    // Only the skill's own files: the root also holds the rest of the repository.
+    rmSync(join(dest, 'reference'), { recursive: true, force: true });
+    for (const file of skillFiles(cli)) cpSync(join(cli, file), join(dest, file), { recursive: true });
+    copies++;
+  }
+  console.log(`sync-skills: ${copies} skill copies (${Object.keys(PLUGIN_SKILLS).length} plugins, the CLI skill at the root and in postemi-cli)`);
 }
