@@ -11,7 +11,7 @@ Do the steps in this order; each one says how to check it.
 | npm package `postemi` (command `postemi`) | repository root (`src/`, built by `pnpm build` into `dist/`) | `https://api.postemi.com`, device login on postemi.com/app/device |
 | Claude chat bundle `postemi` | `plugins/postemi-mcp` | `https://mcp.postemi.com/mcp` |
 | Claude Code plugin `postemi-cli` | `plugins/postemi-cli` | the `postemi` command |
-| ChatGPT app "Postemi: Social Media Scheduler" | `plugins/postemi-chatgpt` (see its `SUBMIT.md`) | `https://mcp.postemi.com/mcp` |
+| ChatGPT app "Postemi Social Media Scheduler" | `plugins/postemi-chatgpt` (see its `SUBMIT.md`) | `https://mcp.postemi.com/mcp` |
 | Cursor plugin `postemi` | `plugins/postemi-cursor`, listed in `.cursor-plugin/marketplace.json` | same |
 | Grok Build plugin `postemi` | `plugins/postemi-grok` | same |
 | Agent skill `postemi` (ClawHub, Hermes, skills.sh) | `skills/postemi/SKILL.md` | the `postemi` command |
@@ -111,12 +111,17 @@ Anthropic; it lives in this repository's marketplace.
 
 ## 4. ChatGPT app (owner submits)
 
-Follow `plugins/postemi-chatgpt/SUBMIT.md`. Open TODOs there: the demo video
-(`review.demo_recording_url`), the review test image on postemi.com, the
-reviewer account. ZIP the folder contents without `SUBMIT.md`:
+Follow `plugins/postemi-chatgpt/SUBMIT.md` for the hosted MCP checks, demo
+recording and private reviewer access. From the repository root, ZIP the
+package contents without `SUBMIT.md`:
 
 ```bash
-cd plugins/postemi-chatgpt && zip -r ../../postemi-chatgpt-1.1.0.zip plugin.json mcp.json assets skills
+output_dir="${TMPDIR%/}/postemi-chatgpt"
+mkdir -p "$output_dir"
+(
+  cd plugins/postemi-chatgpt &&
+    zip -r -X -FS "$output_dir/postemi-chatgpt-1.0.0.zip" plugin.json mcp.json assets skills
+)
 ```
 
 Upload with the general "Upload new or existing plugin" box, so it is a NEW

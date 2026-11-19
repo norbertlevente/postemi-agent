@@ -1,12 +1,15 @@
 ---
 name: postemi
-description: Plan, write, preview, schedule, change, list and delete social media posts with Postemi, read their analytics (37 platforms and apps, including Facebook, Instagram, X, LinkedIn, TikTok, YouTube, Threads, Bluesky, Pinterest and Mastodon), and open the Postemi app. Use for anything about the user's social media calendar, posting, scheduling or publishing.
+description: Use Postemi to manage the user's connected social channels across 37 platforms and apps. Preview, schedule, publish, edit or cancel posts, open the content calendar, and read channel or post analytics.
 ---
 
 # Postemi
 
-Postemi is the user's social media scheduler. You write the post; Postemi
-checks it, shows it and publishes it. The Postemi tools do all the work.
+Postemi is the user's social media scheduler. Use its tools for requests
+about the user's social posts, channels or content calendar. Leave private
+messages, meeting calendars and general social media questions to ChatGPT.
+If Postemi asks for authentication, tell the user to connect their Postemi
+account using the ChatGPT sign-in prompt.
 
 ## Workflow for a new post
 
@@ -17,11 +20,14 @@ checks it, shows it and publishes it. The Postemi tools do all the work.
    tell same-named accounts apart, and say it back to the user. Skip channels
    with `disabled` or `needsReconnect`.
 3. Call `get_integration_schema` for each channel and follow its rules and
-   its character limit.
+   its character limit. If a setting needs a choice such as a Pinterest
+   board, use `get_channel_options` with the channel ID and the method and
+   inputs returned by the channel schema.
 4. Call `preview_post` with the payload you intend to send. Show the user the
    account, the handle, the local time, the character count and every
-   problem. Call `create_post` only after the user confirms, with a new
-   `idempotencyKey`.
+   problem. Call `create_post` only after the user confirms the final
+   preview. Use a new `idempotencyKey` for each new request. Reuse that key
+   and payload if the same request times out.
 5. Media: a file in this conversation or a public URL goes through
    `upload_media_from_url`; this is the default. Use `create_upload_link`
    for a video, for a file on the user's device that is not in the
@@ -58,9 +64,10 @@ checks it, shows it and publishes it. The Postemi tools do all the work.
   Bluesky, and comments on LinkedIn and Facebook. Ask which the user wants.
 - X posts get no links; `preview_post` shows the links it removes.
 - Numbers: `get_analytics` (`integrationId`, `days`) for a channel and
-  `get_post_analytics` (`postId`) for one published post report the
-  platform's own numbers, as the network gives them. Read each entry's
-  `label`; an empty answer means the network gives none. Never estimate.
+  `get_post_analytics` (`postId`, optional `days`) for one published post
+  report the platform's own numbers. Use each metric's label and the
+  requested date range. When `available` is false, relay the tool's
+  `message` without estimating numbers.
 - `delete_post` refuses a published post. It deletes one channel; pass
   `allChannels: true` only when the user wants every channel of the post.
   Ask before you delete.

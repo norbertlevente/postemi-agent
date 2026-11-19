@@ -1,78 +1,91 @@
-# Submitting Postemi to the ChatGPT app directory (owner)
+# Submit Postemi to the ChatGPT directory
 
-This package is a NEW app, "Postemi: Social Media Scheduler", version 1.1.0.
-It is not a version of any other app on the same OpenAI account. Only the
-owner submits. Nothing here has
-been uploaded or submitted.
+Create a new plugin in the owner's OpenAI **Personal** organization. The
+package name is `postemi`, the listing name is **Postemi Social Media Scheduler**,
+and the first version is `1.0.0`. Use the general upload control and choose
+**With MCP** if prompted. Use Norbert Levente Kiss as the verified developer
+identity and a project with global data residency.
 
-## Identity: do not reuse another app's id
+## Production MCP checks
 
-- `plugin.json` `name` is `postemi`. A package whose `name` is an existing
-  OpenAI app id (`app-...`) lands on that app's listing when uploaded. Never
-  copy another app's id here.
-- TODO (owner): the OpenAI app id field is empty on purpose. Create the new
-  app first (see below). If OpenAI then assigns an id like `app-...` and later
-  uploads need it to match, put that id in `name` and commit it. Until then
-  `postemi` stays.
-- Create it with the dashboard's general "Upload new or existing plugin" box
-  (this is the path that makes a separate plugin). Do NOT use an existing
-  listing's own "Upload plugin to make changes" box.
+The package declares Streamable HTTP at https://mcp.postemi.com/mcp. OAuth
+and dynamic client registration use discovery. On 2026-11-19 the public documents
+advertised S256 PKCE, the unauthenticated initialize returned HTTP 401 with the
+Bearer discovery challenge, and dynamic registration accepted
+`https://chatgpt.com/connector_platform_oauth_redirect`.
 
-## Must be live first
+Before upload, deploy and verify the hosted MCP contract in ChatGPT:
 
-1. The Postemi MCP server at the URL in `mcp.json` (one place; change it there
-   only, for example if the backend ends up on `/mcp-oauth`), with OAuth
-   sign-in, the full tool list, the cards, the side panel, the settings page
-   and the @ menu. The widget CSP and the upload card's storage CORS must
-   allow the new app's sandbox origin (a bucket rule written for another app's
-   origin does not).
-2. https://postemi.com, /help, /privacy, /terms and /app/login answer 200.
-3. The review test image at https://postemi.com/review/postemi-test-photo.jpg
-   (TODO: add the review test photo to the Postemi web repo as
-   `public/review/postemi-test-photo.jpg` and deploy).
-4. Test in developer mode first: ChatGPT Settings, Security and login,
-   Developer mode; add the URL from `mcp.json`; Refresh. Check the sidebar
-   entry, the side panel, the settings page and the @ menu on desktop.
+- Make sure both analytics tools are live. Confirm the scope and available tools
+  after signing in with the review account.
+- Version the submitted tool metadata, `_meta`, UI resource URIs and server
+  instructions together on the host. Check that `update_post` advertises
+  `destructiveHint: true`, as it does in the backend source. Review all tools'
+  `readOnlyHint`, `openWorldHint` and `destructiveHint` values against their actual
+  effects. The channel schema lookup can fetch and persist updated X account
+  status. The channel options lookup may refresh credentials or disconnect a
+  channel after a failed refresh.
+- Verify the scan treats `get_integration_schema` as one channel's posting rules
+  and `get_channel_options` as the concrete lookup it performs. If the scan
+  flags the provider-method dispatcher again, expose each supported lookup as
+  a separately named tool on the submitted surface.
+- Keep subscription plans, checkout, upgrade and billing portal links off the
+  submitted ChatGPT surface. The backend filters the four billing tools for
+  recognized ChatGPT requests, and the shared server instructions still
+  describe them. Remove that billing guidance from the ChatGPT instructions
+  and confirm that the registered portal client receives the filtered tool
+  list. Check OAuth onboarding and cards too. The directory allows access to
+  existing paid accounts. Complete the optional commerce declaration once the
+  hosted behavior is verified.
+- Check product naming in tools, instructions, card resources and CSP origins.
+  Verify the widget CSP and upload storage CORS for the new app's sandbox origin.
+  In ChatGPT developer mode, exercise the calendar, composer, channel list,
+  settings and desktop channel/post picker.
 
-## Reviewer account (TODO, owner creates)
+[OpenAI MCP review requirements](https://developers.openai.com/plugins/deploy/app-review)
+and [plugin guidelines](https://developers.openai.com/plugins/plugin-guidelines)
+cover the hosted contract and subscription restrictions.
 
-- E-mail: `reviewer@postemi.com` (placeholder; create the mailbox and the
-  account).
-- Login: https://postemi.com/app/login
-- Setup: a plan with API and MCP access, a Facebook Page, Instagram and
-  YouTube connected, a timezone set.
-- Enter the credentials in the dashboard's Review information dialog. They are
-  not in the package.
+## Reviewer access and recording
 
-## Demo video (TODO, owner records)
+In **Review information → Review details**, enter the dedicated Team account's
+email and password in the private fields. Use https://postemi.com/app/login for
+the sign-in URL. Specify the exact workspace name and sign-in instructions.
+Select a workspace with a saved timezone and connected Facebook Page, Instagram
+and YouTube test channels. Keep a sample Instagram post in the workspace that
+was published through Postemi within the past 30 days. Confirm the account can
+sign in and complete all cases without access to a private inbox or another
+account.
 
-`review.demo_recording_url` in `plugin.json` holds a TODO text. Record the
-13-step script (the positive test cases in `plugin.json`, in order) on the Postemi reviewer account, upload it to YouTube (unlisted is
-fine) and put the link there before the final upload.
+All eight cases are in `plugin.json`. Status is **Not run** for all eight.
+The public 1024 × 1024 PNG in the first prompt was verified and matches the
+listing kit's logo. Rehearse the five positive cases in one ChatGPT conversation
+on the review account. Run the three negative cases in fresh conversations and
+check that no Postemi tool is invoked.
 
-## Steps on platform.openai.com
+Record the signed-in ChatGPT workflow, keeping credentials off screen. Show
+the Facebook and Instagram preview with the imported image, then confirm the
+future schedule. Show the YouTube image validation, the Instagram analytics
+requests, and the calendar with UTC and local times. Cancel the two scheduled
+posts and show the refreshed calendar. Show the calendar, composer and channel
+list in ChatGPT. The listing kit's web-app video is a separate asset.
 
-1. Plugins, "Upload new or existing plugin", the owner's verified identity. Upload a
-   ZIP of this folder's contents (`plugin.json`, `mcp.json`, `assets/`,
-   `skills/`; leave `SUBMIT.md` out). Check that a NEW plugin named "Postemi:
-   Social Media Scheduler" was created and that no existing listing changed.
-2. MCPs tab: Connect account for the scan (the reviewer account or the
-   owner's), run the scan, resolve findings.
-3. Review information: reviewer credentials, check the test cases, the video
-   link and the 25 countries listed below.
-4. Submit (owner only). After approval, publish by hand.
+Host the recording at a URL reviewers can play without signing in. After
+verifying playback and access, set `extensions.com.openai.review.demo_recording_url`
+in `plugin.json` and rebuild the ZIP, or enter the URL in Review details if the
+field is editable.
 
-## Listing facts
+## Portal setup
 
-- Display name: Postemi: Social Media Scheduler
-- Version: 1.1.0, English only (no translations)
-- Countries: CH, AT, DE, CZ, SK, PL, RO, SI, GB, IE, US, CA, FR, ES, IT, PT,
-  NL, BE, LU, SE, DK, NO, FI, HR, GR
-- Links: https://postemi.com, /help, /privacy, /terms
-- Brand colour #0A0A0A (dark mode #FFFFFF); logo `assets/logo.png` (512 x 512,
-  black mark on white), composer icon `assets/logo.svg` (black mark).
-- The MCP server at mcp.postemi.com lists `open_postemi` and
-  `open_postemi_panel`, the widgets `ui://postemi/*` and the @-menu links
-  `postemi://`; the skills call them as written. (The old tool names still
-  run there as hidden aliases, but are never listed.) Submit only after
-  the backend with these names is deployed.
+1. Upload the ZIP from [PUBLISHING.md](../../PUBLISHING.md#4-chatgpt-app-owner-submits)
+   and confirm that the dashboard created a new Postemi draft.
+2. Under **MCPs**, verify the domain with the exact token and URL supplied by
+   the dashboard, connect over OAuth, and run the tool scan against the deployed
+   version. Resolve findings and check the saved metadata and UI references.
+3. Check the imported test cases, listing, release notes and 25 countries.
+   Supply the demo URL and private reviewer access. Complete the current scan,
+   annotation explanations and any frame-domain explanations the portal requires.
+4. The owner completes the policy attestations and submits for review. Publish
+   manually after approval.
+
+[OpenAI upload and review guide](https://developers.openai.com/plugins/deploy/submission)
