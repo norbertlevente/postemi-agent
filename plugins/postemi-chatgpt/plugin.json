@@ -95,8 +95,8 @@
               "prompt": "Write a short e-mail to my landlord about the broken heater in my flat."
             },
             {
-              "description": "Do not trigger for social analytics, which the Postemi tools do not expose.",
-              "prompt": "Show me my Instagram engagement analytics for last month."
+              "description": "Do not trigger for general knowledge about a social network that needs no action on the user's accounts.",
+              "prompt": "In general, how does Instagram decide which reels to show people?"
             }
           ]
         },
