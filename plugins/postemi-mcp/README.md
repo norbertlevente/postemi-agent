@@ -1,4 +1,4 @@
-# Postemi: Social Media Scheduler (Claude plugin)
+# Postemi: AI Social Media Scheduler (Claude plugin)
 
 Connects Claude to Postemi (https://postemi.com) over MCP, so Claude can write,
 schedule and publish social media posts to 37 platforms and apps, including Facebook,
