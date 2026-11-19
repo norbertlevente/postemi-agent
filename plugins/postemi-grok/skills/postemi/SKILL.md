@@ -1,6 +1,6 @@
 ---
 name: postemi
-description: Write, preview, schedule, list and cancel social media posts with Postemi's MCP tools (37 platforms and apps, including Facebook, Instagram, X, LinkedIn, TikTok, YouTube, Threads, Bluesky, Pinterest and Mastodon). Use for anything about posting, scheduling, a content calendar, or announcing a release or a feature on social media.
+description: Write, preview, schedule, change, list and cancel social media posts, and read their analytics, with Postemi's MCP tools (37 platforms and apps, including Facebook, Instagram, X, LinkedIn, TikTok, YouTube, Threads, Bluesky, Pinterest and Mastodon). Use for anything about posting, scheduling, a content calendar, or announcing a release or a feature on social media.
 ---
 
 # Postemi
@@ -35,6 +35,14 @@ paste a key into the chat and do not install a CLI for this.
 - Entries after the first in `postsAndComments` are a thread on X, Threads and
   Bluesky, and comments on LinkedIn and Facebook. Ask which the user wants.
 - X posts get no links; `preview_post` lists the links it would remove.
+- To change a post: `get_post`, show the user the change, then `update_post`
+  (send every part back). Only the time: `reschedule_post`. A failed post:
+  `retry_post`, then tell the user the result for each post, quoting the
+  platform's own message. A published post cannot be changed.
+- Numbers: `get_analytics` (`integrationId`, `days`) for a channel and
+  `get_post_analytics` (`postId`) for one published post report the
+  platform's own numbers, as the network gives them. Read each entry's
+  `label`; an empty answer means the network gives none. Never estimate.
 - `list_posts` answers "what is scheduled". `delete_post` cancels one channel
   of a post before it publishes; pass `allChannels: true` only when the user
   wants every channel. Ask before you delete.

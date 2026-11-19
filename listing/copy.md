@@ -186,6 +186,11 @@ Tools:
 | `preview_post` | Shows the post, the time and any problem; writes nothing |
 | `create_post` | Schedules, publishes or drafts the post |
 | `list_posts`, `delete_post` | Read the calendar and take back a scheduled post |
+| `get_post`, `update_post` | Read one post in full and change a scheduled, draft or failed post |
+| `reschedule_post`, `retry_post` | Move posts to a new time; publish failed posts again when a retry can work |
+| `get_analytics`, `get_post_analytics` | A channel's or one post's analytics: the platform's own numbers |
+| `read_settings`, `update_settings` | Your saved timezone and the active workspace |
+| `open_postemi` | Opens the Postemi app (calendar, composer, channels) in the chat |
 | `upload_media_from_url` | Adds an image or video from a URL or a file |
 | `create_upload_link`, `list_upload_link_files` | A browser upload page for big files (videos up to 1 GB) |
 | `get_plans`, `subscribe`, `get_subscription`, `manage_subscription` | Plans and billing, only when you ask |

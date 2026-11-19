@@ -1,6 +1,6 @@
 ---
 name: postemi
-description: Plan, write, preview, schedule, list and delete social media posts with Postemi (37 platforms and apps, including Facebook, Instagram, X, LinkedIn, TikTok, YouTube, Threads, Bluesky, Pinterest and Mastodon), and open the Postemi app. Use for anything about the user's social media calendar, posting, scheduling or publishing.
+description: Plan, write, preview, schedule, change, list and delete social media posts with Postemi, read their analytics (37 platforms and apps, including Facebook, Instagram, X, LinkedIn, TikTok, YouTube, Threads, Bluesky, Pinterest and Mastodon), and open the Postemi app. Use for anything about the user's social media calendar, posting, scheduling or publishing.
 ---
 
 # Postemi
@@ -42,8 +42,11 @@ checks it, shows it and publishes it. The Postemi tools do all the work.
   `{"view":"compose","draft":{"text":"...","channelIds":["..."],"publishAtUtc":"..."}}`.
   Nothing is saved until the user presses the button in the app.
 - A post the user selects in the app is in your context with its `postId`.
-  To change it, write the new version, preview it, create it after the user
-  confirms, and then delete the old one with `delete_post`.
+  To change it, read it with `get_post`, show the user the new version, and
+  call `update_post` after they confirm (send every part back). Only the
+  time: `reschedule_post`. A failed post: `retry_post`, and tell the user the
+  result for each post, quoting the platform's own message. A published post
+  cannot be changed.
 - A `postemi://channel/<id>` or `postemi://post/<id>` link in a message comes from
   the @ menu. The id is the `integrationId` or the `postId` the tools take.
 
@@ -54,6 +57,10 @@ checks it, shows it and publishes it. The Postemi tools do all the work.
 - Entries after the first in `postsAndComments` are a thread on X, Threads and
   Bluesky, and comments on LinkedIn and Facebook. Ask which the user wants.
 - X posts get no links; `preview_post` shows the links it removes.
+- Numbers: `get_analytics` (`integrationId`, `days`) for a channel and
+  `get_post_analytics` (`postId`) for one published post report the
+  platform's own numbers, as the network gives them. Read each entry's
+  `label`; an empty answer means the network gives none. Never estimate.
 - `delete_post` refuses a published post. It deletes one channel; pass
   `allChannels: true` only when the user wants every channel of the post.
   Ask before you delete.
