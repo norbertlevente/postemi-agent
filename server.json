@@ -3,7 +3,7 @@
   "name": "com.postemi/postemi",
   "title": "Postemi: AI Social Media Scheduler",
   "description": "Write, preview and schedule social media posts to 37 platforms and apps, from Instagram to Bluesky.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "websiteUrl": "https://postemi.com/docs/mcp",
   "repository": {
     "url": "https://github.com/norbertlevente/postemi-agent",
