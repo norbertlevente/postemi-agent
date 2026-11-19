@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Postemi (postemi.com) plugins: the MCP connector for chat, the CLI for coding agents, and the optional growth skill.",
-    "version": "1.1.1"
+    "version": "1.2.0"
   },
   "plugins": [
     {

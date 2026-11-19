@@ -56,20 +56,22 @@ claude plugin install postemi-cli@postemi-agent
 claude plugin install postemi-growth@postemi-agent
 ```
 
-## 2. npm `postemi` 1.1.0 (owner, in Terminal.app: the 2FA is a passkey)
+## 2. npm `postemi` 1.2.0 (owner, in Terminal.app: the 2FA is a passkey)
 
-1.0.1 is on npm. 1.1.0 adds `postemi skills` (the optional writing and growth
-skills, asked once after login) and ships the skills in the package.
+1.2.0 adds changing posts after they are made (`posts:get`, `posts:update`,
+`posts:reschedule`, `posts:retry`), alt text and video covers, `upload:url`,
+`notifications:list`, `analytics:channel`, and the rewritten CLI skill with
+`reference/details.md` (see CHANGELOG.md).
 
 ```bash
 pnpm run release:check               # builds, packs and dry-runs; publishes nothing
 npm publish --access public          # prepublishOnly rebuilds dist/
 ```
 
-Check: `npm view postemi version` (1.1.0, a few minutes after),
+Check: `npm view postemi version` (1.2.0, a few minutes after),
 `npm i -g postemi && postemi --help && postemi auth:status`.
 The tarball holds `dist/index.js` (starts with `#!/usr/bin/env node`),
-`dist/index.js.map`, `README.md`, `SKILL.md`, `PROVIDER_SETTINGS.md`,
+`dist/index.js.map`, `README.md`, `SKILL.md`, `reference/details.md`, `PROVIDER_SETTINGS.md`,
 `SUPPORTED_FILE_TYPES.md`, `examples/`, `skills/` (core, writing, templates,
 growth, for `postemi skills add`), `LICENSE` and `package.json`.
 
@@ -114,7 +116,7 @@ Follow `plugins/postemi-chatgpt/SUBMIT.md`. Open TODOs there: the demo video
 reviewer account. ZIP the folder contents without `SUBMIT.md`:
 
 ```bash
-cd plugins/postemi-chatgpt && zip -r ../../postemi-chatgpt-1.0.0.zip plugin.json mcp.json assets skills
+cd plugins/postemi-chatgpt && zip -r ../../postemi-chatgpt-1.1.0.zip plugin.json mcp.json assets skills
 ```
 
 Upload with the general "Upload new or existing plugin" box, so it is a NEW
@@ -125,7 +127,7 @@ app. After approval, publish by hand.
 From the repository root (the path must be a folder):
 
 ```bash
-clawhub skill publish ./skills/postemi --slug postemi --version 1.1.0
+clawhub skill publish ./skills/postemi --slug postemi --version 1.2.0
 ```
 
 Check: the scan is CLEAN, `hermes skills install clawhub/postemi` works.

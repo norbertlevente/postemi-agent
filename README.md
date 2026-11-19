@@ -83,6 +83,32 @@ postemi posts:create -c "Hello from the terminal" -m "$IMG" \
 Results are JSON on stdout; status lines and errors go to stderr, and every
 failure exits 1. Run `postemi <command> --help` for each command.
 
+More of what the CLI does:
+
+```bash
+# Alt text for the post's media, in order (repeat --alt)
+postemi posts:create -c "Content" -m "$IMG1,$IMG2" --alt "First picture" --alt "Second picture" \
+  -s "2026-12-31 09:00" -i "<id>"
+
+# Video cover: a frame (Instagram, TikTok) or a picture from postemi upload (Instagram)
+postemi posts:create -c "Content" -m "$VIDEO" --cover-frame 2.5 -s "2026-12-31 09:00" -i "<id>"
+postemi posts:create -c "Content" -m "$VIDEO" --cover-image "$COVER" -s "2026-12-31 09:00" -i "<id>"
+
+# A file that is already online, instead of postemi upload
+postemi upload:url https://example.com/photo.jpg
+
+# After a post is made
+postemi posts:get <id>                               # one post in full (parts, media, alt text, cover, state, failure reason)
+postemi posts:update <id> -c "..." [-m ...] [--alt ...] [-s ...] [-t ...]   # change a scheduled, draft or failed post; send every part
+postemi posts:reschedule <id...> -s "2026-12-31 10:00" --timezone Europe/London   # only the time
+postemi posts:retry <id...> [-s date] [--confirmed]  # try failed posts again; Postemi decides per post
+postemi notifications:list                           # failed posts, channels to reconnect
+
+# Analytics: the platform's own numbers
+postemi analytics:platform <integration-id> -d 30    # a channel, last 30 days (also: analytics:channel)
+postemi analytics:post <post-id>                     # one published post
+```
+
 ## Agent skills (optional)
 
 The CLI can install its skills into the coding agents on your machine
@@ -108,6 +134,7 @@ With several agents found it asks which; `--agent` and `--yes` skip that.
 ## More
 
 - [`SKILL.md`](./SKILL.md): every command, flag and rule
+- [`reference/details.md`](./reference/details.md): account creation, key scopes, billing, rate limits, the analytics repair
 - [`PROVIDER_SETTINGS.md`](./PROVIDER_SETTINGS.md): per-channel settings
 - [`SUPPORTED_FILE_TYPES.md`](./SUPPORTED_FILE_TYPES.md): the eight accepted media types
 - [`examples/`](./examples): ready `--json` payloads
@@ -160,11 +187,11 @@ With the CLI, writing and growth are both optional; see below.
 ```bash
 pnpm install
 pnpm build        # dist/index.js
-pnpm test         # type check, build, unit tests (test/), scripts/check.mjs (manifests, skill copies, no other-brand text)
+pnpm test         # type check, build, unit tests (test/), scripts/check.mjs (manifests, skill copies, dashes and links in the skills, no other-brand text)
 node dist/index.js --help
 
 pnpm sync:templates ../postemi/src/lib/app/templates   # regenerate skills/postemi-templates/reference from the web app
-pnpm sync:skills                                       # copy writing and templates into the main plugins, growth into postemi-growth
+pnpm sync:skills                                       # copy the CLI skill to the root and postemi-cli, writing and templates into the main plugins, growth into postemi-growth
 ```
 
 Release steps: [`PUBLISHING.md`](./PUBLISHING.md). Changes: [`CHANGELOG.md`](./CHANGELOG.md).

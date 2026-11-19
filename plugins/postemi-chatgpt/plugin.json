@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "postemi",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Write, schedule and publish social media posts from ChatGPT with Postemi: 37 platforms and apps, including Facebook, Instagram, X, LinkedIn, TikTok, YouTube, Threads, Bluesky, Pinterest and Mastodon. Plan a content calendar, preview every post per account, and manage scheduled posts in the Postemi app inside ChatGPT.",
   "author": {
     "name": "Norbert Levente Kiss",

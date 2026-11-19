@@ -1,6 +1,6 @@
 # Submitting Postemi to the ChatGPT app directory (owner)
 
-This package is a NEW app, "Postemi: Social Media Scheduler", version 1.0.0.
+This package is a NEW app, "Postemi: Social Media Scheduler", version 1.1.0.
 It is not a version of any other app on the same OpenAI account. Only the
 owner submits. Nothing here has
 been uploaded or submitted.
@@ -65,7 +65,7 @@ fine) and put the link there before the final upload.
 ## Listing facts
 
 - Display name: Postemi: Social Media Scheduler
-- Version: 1.0.0, English only (no translations)
+- Version: 1.1.0, English only (no translations)
 - Countries: CH, AT, DE, CZ, SK, PL, RO, SI, GB, IE, US, CA, FR, ES, IT, PT,
   NL, BE, LU, SE, DK, NO, FI, HR, GR
 - Links: https://postemi.com, /help, /privacy, /terms

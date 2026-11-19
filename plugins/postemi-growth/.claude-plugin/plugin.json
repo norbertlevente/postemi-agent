@@ -1,7 +1,7 @@
 {
   "name": "postemi-growth",
   "displayName": "Postemi Growth",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Optional Postemi skill: grow an audience on social media. Choosing networks and a first niche, a 30-day posting test, cadence per network, reading the numbers, 30 post angles for one topic, repurposing, bios and profile links, and a weekly review. Install it next to the Postemi plugin (MCP or CLI), which schedules the posts.",
   "author": {
     "name": "Norbert Kiss",
