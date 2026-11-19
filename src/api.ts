@@ -303,6 +303,41 @@ export class PostemiAPI {
     });
   }
 
+  /** One channel's post in full: parts, attachments, alt text, cover, settings, tags, failure. */
+  async getPost(id: string) {
+    return this.request(`/public/v1/posts/${encodeURIComponent(id)}`, {
+      method: 'GET',
+    });
+  }
+
+  /** Rewrite one channel's scheduled, draft or failed post (every part is sent). */
+  async updatePost(id: string, body: any) {
+    return this.request(`/public/v1/posts/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    });
+  }
+
+  /** Move one scheduled or draft post to a new time; content unchanged. */
+  async reschedulePost(id: string, date: string) {
+    return this.request(`/public/v1/posts/${encodeURIComponent(id)}/date`, {
+      method: 'PUT',
+      body: JSON.stringify({ date }),
+    });
+  }
+
+  /** Publish failed posts again; the server decides per post whether a retry can work. */
+  async retryPosts(ids: string[], date?: string, userConfirmed?: boolean) {
+    return this.request('/public/v1/posts/retry', {
+      method: 'POST',
+      body: JSON.stringify({
+        ids,
+        ...(date ? { date } : {}),
+        ...(userConfirmed ? { userConfirmed: true } : {}),
+      }),
+    });
+  }
+
   /** The whole group: every channel of one multi-channel post. */
   async deletePostGroup(group: string) {
     return this.request(`/public/v1/posts/group/${encodeURIComponent(group)}`, {
@@ -396,15 +431,34 @@ export class PostemiAPI {
     });
   }
 
+  /** A channel's numbers over the last `date` days, as the platform reports them. */
   async getAnalytics(integrationId: string, date: string) {
-    return this.request(`/public/v1/analytics/${integrationId}?date=${encodeURIComponent(date)}`, {
+    return this.request(
+      `/public/v1/analytics/${encodeURIComponent(integrationId)}?date=${encodeURIComponent(date)}`,
+      { method: 'GET' }
+    );
+  }
+
+  /** One published post's numbers, as the platform reports them. */
+  async getPostAnalytics(postId: string, date: string) {
+    return this.request(
+      `/public/v1/analytics/post/${encodeURIComponent(postId)}?date=${encodeURIComponent(date)}`,
+      { method: 'GET' }
+    );
+  }
+
+  /** The workspace's notification feed, newest first, 100 a page (page 0 first). */
+  async listNotifications(page = 0) {
+    return this.request(`/public/v1/notifications?page=${encodeURIComponent(String(page))}`, {
       method: 'GET',
     });
   }
 
-  async getPostAnalytics(postId: string, date: string) {
-    return this.request(`/public/v1/analytics/post/${postId}?date=${encodeURIComponent(date)}`, {
-      method: 'GET',
+  /** Import a public https image or video into the media library; same answer as upload. */
+  async uploadFromUrl(url: string) {
+    return this.request('/public/v1/upload-from-url', {
+      method: 'POST',
+      body: JSON.stringify({ url }),
     });
   }
 

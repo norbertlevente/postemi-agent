@@ -1,9 +1,10 @@
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
-import { createPost, listPosts, deletePost, deletePostGroup, getMissingContent, connectPost, changePostStatus, findSlot } from './commands/posts';
+import { createPost, listPosts, deletePost, deletePostGroup, getMissingContent, connectPost, changePostStatus, findSlot, getPost, updatePost, reschedulePosts, retryPosts } from './commands/posts';
 import { listIntegrations, listGroups, getIntegrationSettings, triggerIntegrationTool } from './commands/integrations';
 import { getAnalytics, getPostAnalytics } from './commands/analytics';
-import { uploadFile, createUploadLink, listUploadLinkFiles } from './commands/upload';
+import { uploadFile, uploadFromUrl, createUploadLink, listUploadLinkFiles } from './commands/upload';
+import { listNotifications } from './commands/notifications';
 import { authLogin, authLogout, authStatus, authSignup } from './commands/auth';
 import { configSet, configGet } from './commands/config';
 import { listWorkspaces, useWorkspace, currentWorkspace } from './commands/workspaces';
@@ -85,6 +86,22 @@ yargs(hideBin(process.argv))
         .option('settings', {
           describe: `Platform-specific settings as JSON string (schema: "${BRAND.cli} integrations:settings <id>")`,
           type: 'string',
+        })
+        .option('cover-frame', {
+          describe:
+            'Video cover: the moment of the post\'s first video to show as the cover, in seconds (e.g. 2.5). Instagram and TikTok (TikTok: frame only, direct posts only)',
+          type: 'number',
+        })
+        .option('cover-image', {
+          describe:
+            `Video cover: a separate picture for the post's first video (a URL from "${BRAND.cli} upload"). Instagram only; wins over --cover-frame there`,
+          type: 'string',
+        })
+        .option('alt', {
+          describe:
+            'Alt text for the media of the post itself (the first -c), in -m order. Repeat once per file.',
+          type: 'string',
+          array: true,
         })
         .check((argv) => {
           if (!argv.json && !argv.content) {
@@ -201,6 +218,58 @@ yargs(hideBin(process.argv))
         .example('$0 posts:delete-group grp_9f8e7d6c', 'Delete every channel of group grp_9f8e7d6c');
     },
     deletePostGroup as any
+  )
+  .command(
+    'posts:get <id>',
+    'Read one post (one channel) in full: parts, media, alt text, cover, settings, tags, failure reason',
+    (yargs: Argv) =>
+      yargs
+        .positional('id', { describe: 'Post ID (from posts:list)', type: 'string' })
+        .example('$0 posts:get post-123', 'The input for posts:update'),
+    getPost as any
+  )
+  .command(
+    'posts:update <id>',
+    'Change a scheduled, draft or failed post (one channel): send every part, changed or not',
+    (yargs: Argv) =>
+      yargs
+        .positional('id', { describe: 'Post ID (from posts:list)', type: 'string' })
+        .option('content', { alias: 'c', describe: 'Each part, like posts:create (the post, then its thread or comments)', type: 'string' })
+        .option('media', { alias: 'm', describe: `Comma-separated media URLs for the -c before it (from "${BRAND.cli} upload")`, type: 'string' })
+        .option('alt', { describe: 'Alt text for the post\'s media (first -c), in -m order. Repeat once per file. Files sent again keep their alt text otherwise', type: 'string', array: true })
+        .option('cover-frame', { describe: 'Video cover: the moment of the post\'s first video, in seconds', type: 'number' })
+        .option('cover-image', { describe: `Video cover picture (Instagram), a URL from "${BRAND.cli} upload"`, type: 'string' })
+        .option('date', { alias: 's', describe: 'New publish date (as in posts:create). Leave out to keep the post\'s time', type: 'string' })
+        .option('timezone', { describe: 'IANA timezone for a --date without offset', type: 'string' })
+        .option('type', { alias: 't', describe: 'schedule, draft or now. Leave out: a draft stays a draft, anything else is scheduled', type: 'string', choices: ['schedule', 'draft', 'now'] })
+        .option('settings', { describe: 'Platform settings JSON (as in posts:create). Leave out to keep them', type: 'string' })
+        .option('json', { alias: 'j', describe: 'Path to a JSON body: {date, type, settings, parts:[{content, attachments, altText, cover}]} (the shape posts:get returns)', type: 'string' })
+        .example('$0 posts:get post-123', 'Read it first')
+        .example('$0 posts:update post-123 -c "New text" -m "$IMG" --alt "A red bicycle"', 'Change text and alt text, keep the time'),
+    updatePost as any
+  )
+  .command(
+    'posts:reschedule <id..>',
+    'Move scheduled or draft posts to a new time; content unchanged (failed posts: posts:retry)',
+    (yargs: Argv) =>
+      yargs
+        .positional('id', { describe: 'One or more post IDs (from posts:list)', type: 'string' })
+        .option('date', { alias: 's', describe: 'New publish date (as in posts:create)', type: 'string', demandOption: true })
+        .option('timezone', { describe: 'IANA timezone for a --date without offset', type: 'string' })
+        .example(`$0 posts:reschedule post-1 post-2 -s "2026-12-31 09:00" --timezone ${BRAND.exampleTimezone}`, 'Move two posts'),
+    reschedulePosts as any
+  )
+  .command(
+    'posts:retry <id..>',
+    `Publish failed posts again, when a retry can work (${BRAND.name} checks why each failed)`,
+    (yargs: Argv) =>
+      yargs
+        .positional('id', { describe: 'One or more failed post IDs (posts:list shows state ERROR and why)', type: 'string' })
+        .option('date', { alias: 's', describe: 'When to retry (as in posts:create). Leave out for now', type: 'string' })
+        .option('timezone', { describe: 'IANA timezone for a --date without offset', type: 'string' })
+        .option('confirmed', { describe: 'Only after the answer asked for it and the user confirmed: the post is not already live, or the account problem is fixed', type: 'boolean', default: false })
+        .example('$0 posts:retry post-123', 'Retry now; the answer says per post if it was not retried and what to fix'),
+    retryPosts as any
   )
   .command(
     'posts:find-slot <id>',
@@ -351,12 +420,12 @@ yargs(hideBin(process.argv))
     triggerIntegrationTool as any
   )
   .command(
-    'analytics:platform <id>',
-    'Get analytics for a specific integration/channel',
+    ['analytics:platform <id>', 'analytics:channel <id>'],
+    "A channel's analytics over the last N days: the platform's own numbers (followers, impressions, likes...)",
     (yargs: Argv) => {
       return yargs
         .positional('id', {
-          describe: 'Integration ID',
+          describe: 'Integration (channel) ID, from integrations:list',
           type: 'string',
         })
         .option('days', {
@@ -370,19 +439,19 @@ yargs(hideBin(process.argv))
           'Get last 7 days of analytics'
         )
         .example(
-          '$0 analytics:platform integration-123 -d 30',
-          'Get last 30 days of analytics'
+          '$0 analytics:channel integration-123 -d 30',
+          'Get last 30 days of analytics (analytics:channel is the same command)'
         );
     },
     getAnalytics as any
   )
   .command(
     'analytics:post <id>',
-    'Get analytics for a specific post',
+    "One published post's analytics: the platform's own numbers",
     (yargs: Argv) => {
       return yargs
         .positional('id', {
-          describe: 'Post ID',
+          describe: 'Post ID, from posts:list',
           type: 'string',
         })
         .option('days', {
@@ -416,6 +485,19 @@ yargs(hideBin(process.argv))
     uploadFile as any
   )
   .command(
+    'upload:url <url>',
+    'Import an image or video that is already online (a public https URL); returns the URL to pass to posts:create -m',
+    (yargs: Argv) => {
+      return yargs
+        .positional('url', {
+          describe: 'Public https URL of an image or an mp4 video (same types and sizes as upload)',
+          type: 'string',
+        })
+        .example('$0 upload:url https://example.com/photo.jpg', 'Use the returned .path in posts:create -m');
+    },
+    uploadFromUrl as any
+  )
+  .command(
     'upload:link',
     'Get a browser upload link for a file that is not on this machine (e.g. on a phone)',
     (yargs: Argv) => {
@@ -441,6 +523,20 @@ yargs(hideBin(process.argv))
         );
     },
     listUploadLinkFiles as any
+  )
+  .command(
+    'notifications:list',
+    'The workspace notifications, newest first (failed posts, channels to reconnect...), 100 a page',
+    (yargs: Argv) => {
+      return yargs
+        .option('page', {
+          describe: 'Page number, 0 (default) is the newest',
+          type: 'number',
+          default: 0,
+        })
+        .example('$0 notifications:list', 'The newest 100; hasMore says whether --page 1 has more');
+    },
+    listNotifications as any
   )
   .command(
     'workspaces:list',

@@ -28,6 +28,28 @@ export async function uploadFile(args: any) {
 }
 
 /**
+ * `postemi upload:url <url>`: the file is already online. The server fetches
+ * the public https URL itself (private and plain http addresses are refused)
+ * and answers like `upload`; the `.path` goes to posts:create -m.
+ */
+export async function uploadFromUrl(args: any) {
+  const url = String(args.url ?? '').trim();
+  if (!/^https:\/\//i.test(url)) {
+    console.error('❌ Give a public https:// URL of an image or a video.');
+    process.exit(1);
+  }
+  const api = new PostemiAPI(getConfig());
+  try {
+    const res = await api.uploadFromUrl(url);
+    status('✅ File imported. Use its .path in posts:create -m');
+    result(res);
+    return res;
+  } catch (error: any) {
+    fail('Failed to import the file', error);
+  }
+}
+
+/**
  * `postemi upload:link` — for a file that is NOT on this machine.
  *
  * `postemi upload` needs the file on disk. When the person has it on their
