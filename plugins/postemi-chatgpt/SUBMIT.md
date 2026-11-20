@@ -25,10 +25,10 @@ Before upload, deploy and verify the hosted MCP contract in ChatGPT:
   effects. The channel schema lookup can fetch and persist updated X account
   status. The channel options lookup may refresh credentials or disconnect a
   channel after a failed refresh.
-- Verify the scan treats `get_integration_schema` as one channel's posting rules
-  and `get_channel_options` as the concrete lookup it performs. If the scan
-  flags the provider-method dispatcher again, expose each supported lookup as
-  a separately named tool on the submitted surface.
+- Verify the scan treats `get_integration_schema` as one channel's posting rules.
+  The channel lookups are three fixed tools (`list_channel_options`,
+  `search_channel_options`, `list_channel_sub_options`) since 2026-11-20; the
+  `get_channel_options` dispatcher the first scan flagged (6.2(b)) is gone.
 - Keep subscription plans, checkout, upgrade and billing portal links off the
   submitted ChatGPT surface. The backend filters the four billing tools for
   recognized ChatGPT requests, and the shared server instructions still

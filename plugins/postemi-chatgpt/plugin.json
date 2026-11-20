@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "postemi",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Write, preview, schedule and publish social media posts with Postemi in ChatGPT. Manage your content calendar and check channel and post analytics across supported accounts.",
   "author": {
     "name": "Norbert Levente Kiss",
@@ -132,7 +132,31 @@
           "NO",
           "FI",
           "HR",
-          "GR"
+          "GR",
+          "EE",
+          "LV",
+          "LT",
+          "BG",
+          "CY",
+          "MT",
+          "IS",
+          "AU",
+          "NZ",
+          "MX",
+          "BR",
+          "AR",
+          "CL",
+          "CO",
+          "UY",
+          "IL",
+          "TR",
+          "SA",
+          "AE",
+          "IN",
+          "SG",
+          "MY",
+          "JP",
+          "KR"
         ]
       }
     }

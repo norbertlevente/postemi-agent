@@ -21,8 +21,11 @@ account using the ChatGPT sign-in prompt.
    with `disabled` or `needsReconnect`.
 3. Call `get_integration_schema` for each channel and follow its rules and
    its character limit. If a setting needs a choice such as a Pinterest
-   board, use `get_channel_options` with the channel ID and the method and
-   inputs returned by the channel schema.
+   board, its `options` name the tool: `list_channel_options` for the
+   channel's lists (boards, channels, tags), `search_channel_options` for a
+   keyword search (subreddits, communities, Instagram audio), and
+   `list_channel_sub_options` for the choices under one picked item (a
+   subreddit's flairs).
 4. Call `preview_post` with the payload you intend to send. Show the user the
    account, the handle, the local time, the character count and every
    problem. Call `create_post` only after the user confirms the final

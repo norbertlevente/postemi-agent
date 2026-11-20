@@ -182,7 +182,9 @@ Tools:
 | `list_integrations` | Your connected channels and their handles |
 | `list_groups` | Your brands (channel groups) |
 | `get_integration_schema` | The rules and character limit for one channel |
-| `get_channel_options` | Ids for settings such as a board or a category |
+| `list_channel_options` | Ids for settings such as a board, a channel or a category |
+| `search_channel_options` | Finds a subreddit, a community or Instagram audio by keyword |
+| `list_channel_sub_options` | The choices under one pick, such as a subreddit's flairs |
 | `preview_post` | Shows the post, the time and any problem; writes nothing |
 | `create_post` | Schedules, publishes or drafts the post |
 | `list_posts`, `delete_post` | Read the calendar and take back a scheduled post |
