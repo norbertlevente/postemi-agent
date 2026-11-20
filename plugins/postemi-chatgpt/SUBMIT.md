@@ -82,7 +82,7 @@ field is editable.
 2. Under **MCPs**, verify the domain with the exact token and URL supplied by
    the dashboard, connect over OAuth, and run the tool scan against the deployed
    version. Resolve findings and check the saved metadata and UI references.
-3. Check the imported test cases, listing, release notes and 25 countries.
+3. Check the imported test cases, listing, release notes and 49 countries.
    Supply the demo URL and private reviewer access. Complete the current scan,
    annotation explanations and any frame-domain explanations the portal requires.
 4. The owner completes the policy attestations and submits for review. Publish

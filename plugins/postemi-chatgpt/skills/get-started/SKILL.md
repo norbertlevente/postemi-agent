@@ -11,8 +11,10 @@ time and let the user skip any step.
 1. Call `read_settings` with `{}`. It returns the user's timezone and the
    workspace this connection acts on.
 2. If the timezone value is "Not set", ask the user which city or timezone
-   they post from. Map the answer to an IANA name (for example Berlin is
-   `Europe/Berlin`) and call `update_settings` with
+   they post from ("Which timezone should I use for scheduling?"). Map the
+   answer to an IANA name (for example Berlin is `Europe/Berlin`), tell the
+   user you will save it in their Postemi settings, and only after they agree
+   call `update_settings` with
    `{"set":{"timezone":"<name>"}}`. Confirm the saved value from the tool
    result. Do not claim it was saved if the tool fails.
 3. If the settings list more than one workspace, say which workspace is

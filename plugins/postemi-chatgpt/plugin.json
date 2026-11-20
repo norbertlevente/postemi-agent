@@ -61,7 +61,7 @@
             },
             {
               "description": "Continue the same conversation after the Facebook and Instagram previews have no blocking problems. Approve both scheduled posts and complete any confirmation shown by ChatGPT.",
-              "prompt": "I confirm. Schedule both posts exactly as previewed.",
+              "prompt": "I confirm. Schedule both posts exactly as previewed. Then check that both are scheduled for the previewed time.",
               "tools_triggered": "create_post, list_posts",
               "expected_behavior": "After confirmation, uses the two previewed entries, including date, settings and media path, with type=schedule and a fresh idempotency key. Uses the two returned post IDs to verify both are in QUEUE for the previewed time in list_posts. The reply reports both channels and the scheduled local time."
             },
